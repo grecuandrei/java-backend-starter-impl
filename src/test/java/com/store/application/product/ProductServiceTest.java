@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,19 +32,21 @@ class ProductServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void getAllProducts() {
         Product product = new Product();
         product.setName("Test Product");
 
-        when(productRepository.findAll()).thenReturn(List.of(product));
+        when(productRepository.findAll()).thenReturn(Arrays.asList(product));
 
         List<Product> products = productService.getAllProducts();
 
         assertEquals(1, products.size());
-        assertEquals("Test Product", products.getFirst().getName());
+        assertEquals("Test Product", products.get(0).getName());
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void getProductById() {
         UUID id = UUID.randomUUID();
         Product product = new Product();
@@ -59,6 +62,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void getProductByIdNotFound() {
         UUID id = UUID.randomUUID();
 
@@ -70,6 +74,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void createProduct() {
         Product product = new Product();
         product.setName("Test Product");
@@ -83,6 +88,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void createProductAlreadyExists() {
         Product product = new Product();
         product.setName("Test Product");
@@ -93,6 +99,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateProduct() {
         UUID id = UUID.randomUUID();
         Product existingProduct = new Product();
@@ -111,6 +118,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateProductNotFound() {
         UUID id = UUID.randomUUID();
         Product updatedProduct = new Product();
@@ -121,6 +129,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteProduct() {
         UUID id = UUID.randomUUID();
 
@@ -133,6 +142,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteProductNotFound() {
         UUID id = UUID.randomUUID();
 
@@ -142,21 +152,23 @@ class ProductServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void getProductsByCategory() {
         Category category = Category.FRUITS;
         Product product = new Product();
         product.setCategory(category);
         product.setName("Test Product");
 
-        when(productRepository.findByCategory(category)).thenReturn(List.of(product));
+        when(productRepository.findByCategory(category)).thenReturn(Arrays.asList(product));
 
         List<Product> products = productService.getProductsByCategory(category);
 
         assertEquals(1, products.size());
-        assertEquals("Test Product", products.getFirst().getName());
+        assertEquals("Test Product", products.get(0).getName());
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void increaseQuantity() {
         UUID id = UUID.randomUUID();
         Product product = new Product();
@@ -173,6 +185,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void increaseQuantityNotFound() {
         UUID id = UUID.randomUUID();
 

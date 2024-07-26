@@ -3,8 +3,6 @@ package com.store.application.product;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.IdGeneratorType;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.io.Serializable;
@@ -22,7 +20,7 @@ public class Product implements Serializable {
     @Id
     @JsonProperty(value = "Id")
     @Column(name = "id", updatable = false, nullable = false)
-    @GeneratedValue(generator = "UUID")
+    @GeneratedValue(generator = "UUID", strategy = GenerationType.UUID)
     @UuidGenerator
     private UUID id;
 

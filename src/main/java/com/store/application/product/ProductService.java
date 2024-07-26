@@ -46,6 +46,13 @@ public class ProductService implements IProductService {
         return productRepository.findByCategory(category);
     }
 
+    public Product changePrice(UUID id, Double amount) {
+        return productRepository.findById(id).map(product -> {
+            product.setPrice(amount);
+            return productRepository.save(product);
+        }).orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+    }
+
     public Product increaseQuantity(UUID id, int amount) {
         return productRepository.findById(id).map(product -> {
             product.setQuantity(product.getQuantity() + amount);

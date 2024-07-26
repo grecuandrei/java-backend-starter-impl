@@ -71,12 +71,20 @@ public class ProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
+    @PatchMapping("/{id}/changePrice")
+    public ResponseEntity<Product> changePrice(@PathVariable UUID id, @RequestParam Double amount) {
+        try {
+            Product product = productService.changePrice(id, amount);
+            return new ResponseEntity<>(product, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PatchMapping("/{id}/increaseQuantity")
     public ResponseEntity<Product> increaseQuantity(@PathVariable UUID id, @RequestParam int amount) {
         try {
             Product product = productService.increaseQuantity(id, amount);
-            double discountedPrice = product.getPrice() - (product.getPrice() * product.getDiscount() / 100);
-            product.setPrice(discountedPrice);
             return new ResponseEntity<>(product, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
