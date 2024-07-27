@@ -32,7 +32,15 @@ public class ProductService implements IProductService {
     }
 
     public Product updateProduct(UUID id, Product updatedProduct) {
-        return productRepository.findById(id).map(product -> productRepository.save(product)).orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+        return productRepository.findById(id).map(product -> {
+            product.setName(updatedProduct.getName());
+            product.setDescription(updatedProduct.getDescription());
+            product.setCategory(updatedProduct.getCategory());
+            product.setPrice(updatedProduct.getPrice());
+            product.setQuantity(updatedProduct.getQuantity());
+            product.setDiscount(updatedProduct.getDiscount());
+            return productRepository.save(product);
+        }).orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
     }
 
     public void deleteProduct(UUID id) {
