@@ -4,9 +4,10 @@ import com.store.application.exceptions.ProductAlreadyExistsException;
 import com.store.application.exceptions.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class ProductControllerTest {
 
     @Mock
@@ -38,8 +39,7 @@ public class ProductControllerTest {
     private MockMvc mockMvc;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void init() {
         mockMvc = MockMvcBuilders.standaloneSetup(productController).build();
     }
 
@@ -49,7 +49,7 @@ public class ProductControllerTest {
         Product product = new Product();
         product.setName("Test Product");
 
-        when(productService.getAllProducts()).thenReturn(Arrays.asList(product));
+        when(productService.getAllProducts()).thenReturn(List.of(product));
 
         mockMvc.perform(get("/products"))
                 .andExpect(status().isOk());
@@ -58,7 +58,7 @@ public class ProductControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
-        assertEquals("Test Product", response.getBody().get(0).getName());
+        assertEquals("Test Product", response.getBody().getFirst().getName());
     }
 
     @Test
@@ -140,14 +140,14 @@ public class ProductControllerTest {
         product.setId(id);
         product.setName("Updated Product");
 
-        when(productService.updateProduct(eq(id), any(Product.class))).thenReturn(product);
+        when(productService.updateProduct(any(Product.class))).thenReturn(product);
 
-        mockMvc.perform(put("/products/" + id)
+        mockMvc.perform(put("/products")
                         .contentType("application/json")
                         .content("{\"name\":\"Updated Product\"}"))
                 .andExpect(status().isOk());
 
-        ResponseEntity<Product> response = productController.updateProduct(id, product);
+        ResponseEntity<Product> response = productController.updateProduct(product);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Updated Product", response.getBody().getName());
@@ -156,17 +156,16 @@ public class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void testUpdateProductNotFound() throws Exception {
-        UUID id = UUID.randomUUID();
         Product product = new Product();
 
-        when(productService.updateProduct(eq(id), any(Product.class))).thenThrow(new ProductNotFoundException("Product not found"));
+        when(productService.updateProduct(any(Product.class))).thenThrow(new ProductNotFoundException("Product not found"));
 
-        mockMvc.perform(put("/products/" + id)
+        mockMvc.perform(put("/products")
                         .contentType("application/json")
                         .content("{\"name\":\"Updated Product\"}"))
                 .andExpect(status().isNotFound());
 
-        ResponseEntity<Product> response = productController.updateProduct(id, product);
+        ResponseEntity<Product> response = productController.updateProduct(product);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -209,7 +208,7 @@ public class ProductControllerTest {
         product.setCategory(category);
         product.setName("Test Product");
 
-        when(productService.getProductsByCategory(category)).thenReturn(Arrays.asList(product));
+        when(productService.getProductsByCategory(category)).thenReturn(List.of(product));
 
         mockMvc.perform(get("/products/category/" + category.name()))
                 .andExpect(status().isOk());

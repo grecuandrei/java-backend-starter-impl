@@ -8,8 +8,9 @@ public interface IProductService {
     List<Product> getAllProducts();
     Optional<Product> getProductById(UUID id);
     Product createProduct(Product product);
-    Product updateProduct(UUID id, Product updatedProduct);
+    Product updateProduct(Product updatedProduct);
     void deleteProduct(UUID id);
     List<Product> getProductsByCategory(Category category);
+    Product changePrice(UUID id, Double amount);
     Product increaseQuantity(UUID id, int amount);
 }

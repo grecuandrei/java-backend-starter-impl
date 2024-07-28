@@ -35,13 +35,13 @@ public class UserService implements IUserService {
     }
 
     @Transactional
-    public User updateUser(UUID id, User updatedUser) {
-        return userRepository.findById(id).map(user -> {
+    public User updateUser(User updatedUser) {
+        return userRepository.findById(updatedUser.getId()).map(user -> {
             user.setUsername(updatedUser.getUsername());
             user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
             user.setRoles(updatedUser.getRoles());
             return userRepository.save(user);
-        }).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        }).orElseThrow(() -> new UserNotFoundException("User not found with id: " + updatedUser.getId()));
     }
 
     @Transactional

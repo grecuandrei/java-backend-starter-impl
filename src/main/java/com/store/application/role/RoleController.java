@@ -1,6 +1,8 @@
 package com.store.application.role;
 
 import com.store.application.exceptions.RoleNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin/roles")
+@RequestMapping("/roles")
 public class RoleController {
 
     @Autowired
@@ -36,10 +38,10 @@ public class RoleController {
         return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Role> updateRole(@PathVariable UUID id, @RequestBody Role updatedRole) {
+    @PutMapping
+    public ResponseEntity<Role> updateRole(@RequestBody Role updatedRole) {
         try {
-            Role role = roleService.updateRole(id, updatedRole);
+            Role role = roleService.updateRole(updatedRole);
             return new ResponseEntity<>(role, HttpStatus.OK);
         } catch (RoleNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

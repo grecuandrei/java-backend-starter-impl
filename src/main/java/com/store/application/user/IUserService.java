@@ -8,6 +8,6 @@ public interface IUserService {
     List<User> getAllUsers();
     Optional<User> getUserById(UUID id);
     User createUser(User user);
-    User updateUser(UUID id, User updatedUser);
+    User updateUser(User updatedUser);
     void deleteUser(UUID id);
 }
