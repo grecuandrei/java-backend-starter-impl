@@ -2,6 +2,7 @@ package com.store.application.product;
 
 import com.store.application.exceptions.ProductAlreadyExistsException;
 import com.store.application.exceptions.ProductNotFoundException;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/products")
 @Slf4j
+@Api(tags = "Products")
 public class ProductController {
     @Autowired
     private ProductService productService;
@@ -46,6 +48,9 @@ public class ProductController {
         } catch (ProductAlreadyExistsException e) {
             log.error("Product already exists with same name: {}", product.getName());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            log.error("Error creating product: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 

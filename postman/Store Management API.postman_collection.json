@@ -1,0 +1,425 @@
+{
+	"info": {
+		"_postman_id": "5add0a2a-fe93-4c75-8a85-5484160a9646",
+		"name": "Store Management API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11279993"
+	},
+	"item": [
+		{
+			"name": "Get All Products",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Product By ID",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/products/{{productId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"{{productId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Create product and set productId\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.environment.set(\"productId\", jsonData.id);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Cucumber\",\n    \"description\": \"Green\",\n    \"category\": \"VEGETABLES\",\n    \"price\": 8.0,\n    \"quantity\": 90,\n    \"discount\": 1.5\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Product",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{productId}}\",\n    \"name\": \"Updated Cucumber\",\n    \"description\": \"Updated Product Description\",\n    \"category\": \"VEGETABLES\",\n    \"price\": 15.0,\n    \"quantity\": 150,\n    \"discount\": 10.0\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Product",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/products/{{productId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"{{productId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Products By Category",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/products/category/{{category}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"category",
+						"{{category}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Increase Product Quantity",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/products/{{productId}}/increaseQuantity?amount={{amount}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"{{productId}}",
+						"increaseQuantity"
+					],
+					"query": [
+						{
+							"key": "amount",
+							"value": "{{amount}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Users",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/users",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{adminUsername}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{adminPassword}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"user\",\n    \"password\": \"user\",\n    \"roles\": [\n      {\n        \"id\": \"{{roleId}}\"\n      }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/users",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "adminUsername",
+			"value": "admin",
+			"type": "string"
+		},
+		{
+			"key": "adminPassword",
+			"value": "admin",
+			"type": "string"
+		},
+		{
+			"key": "userUsername",
+			"value": "user",
+			"type": "string"
+		},
+		{
+			"key": "userPassword",
+			"value": "user",
+			"type": "string"
+		},
+		{
+			"key": "category",
+			"value": "FRUITS",
+			"type": "string"
+		},
+		{
+			"key": "amount",
+			"value": "5",
+			"type": "string"
+		},
+		{
+			"key": "roleId",
+			"value": "d8e0a218-d14e-496d-8f75-39027551faaa",
+			"type": "string"
+		}
+	]
+}

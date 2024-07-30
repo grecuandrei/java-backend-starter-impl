@@ -1,6 +1,6 @@
 package com.store.application.role;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.store.application.permission.Permission;
 import com.store.application.user.User;
 import jakarta.persistence.*;
@@ -21,9 +21,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @ToString
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class Role {
     @Id
-    @JsonProperty(value = "Id")
     @Column(name = "id", updatable = false, nullable = false)
     @GeneratedValue(generator = "UUID", strategy = GenerationType.UUID)
     @UuidGenerator
@@ -45,6 +47,7 @@ public class Role {
     private Date updatedAt;
 
     @ManyToMany(mappedBy = "roles")
+    @JsonIdentityReference(alwaysAsId = true)
     private Collection<User> users;
 
     @ManyToMany
@@ -54,5 +57,6 @@ public class Role {
                     name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(
                     name = "permission_id", referencedColumnName = "id"))
+    @JsonIdentityReference(alwaysAsId = true)
     private Collection<Permission> permissions;
 }

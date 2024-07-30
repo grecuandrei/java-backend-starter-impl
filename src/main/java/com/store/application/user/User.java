@@ -1,5 +1,6 @@
 package com.store.application.user;
 
+import com.fasterxml.jackson.annotation.*;
 import com.store.application.role.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,6 +20,9 @@ import java.util.UUID;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class User {
     @Id
     @Column(name = "id", updatable = false, nullable = false)
@@ -30,6 +34,7 @@ public class User {
     private String username;
 
     @Column(nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @CreationTimestamp
@@ -49,5 +54,6 @@ public class User {
                     name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(
                     name = "role_id", referencedColumnName = "id"))
+    @JsonIdentityReference(alwaysAsId = true)
     private Collection<Role> roles;
 }

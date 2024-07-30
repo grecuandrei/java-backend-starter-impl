@@ -57,6 +57,7 @@ public class SetupLoader implements ApplicationListener<ContextRefreshedEvent> {
                     .username("admin")
                     .password(passwordEncoder.encode("admin"))
                     .roles(Collections.singletonList(adminRole))
+                    .enabled(true)
                     .build();
             userRepository.save(user);
         }
