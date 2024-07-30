@@ -2,7 +2,6 @@ package com.store.application.product;
 
 import com.store.application.exceptions.ProductAlreadyExistsException;
 import com.store.application.exceptions.ProductNotFoundException;
-import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/products")
 @Slf4j
-@Api(tags = "Products")
 public class ProductController {
     @Autowired
     private ProductService productService;
