@@ -1,6 +1,7 @@
 package com.store.application.role;
 
 import com.store.application.exceptions.RoleNotFoundException;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/roles")
 @Slf4j
+@Hidden
 public class RoleController {
 
     @Autowired

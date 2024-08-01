@@ -1,6 +1,7 @@
 package com.store.application.permission;
 
 import com.store.application.exceptions.PermissionNotFoundException;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/permissions")
 @Slf4j
+@Hidden
 public class PermissionController {
     @Autowired
     private PermissionService permissionService;

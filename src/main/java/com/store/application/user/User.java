@@ -3,6 +3,9 @@ package com.store.application.user;
 import com.fasterxml.jackson.annotation.*;
 import com.store.application.role.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -31,10 +34,12 @@ public class User {
     private UUID id;
 
     @Column(nullable = false)
+    @NotBlank
     private String username;
 
     @Column(nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @NotBlank
     private String password;
 
     @CreationTimestamp
@@ -45,6 +50,7 @@ public class User {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    @Column(name = "enabled")
     private boolean enabled = true;
 
     @ManyToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
@@ -55,5 +61,6 @@ public class User {
             inverseJoinColumns = @JoinColumn(
                     name = "role_id", referencedColumnName = "id"))
     @JsonIdentityReference(alwaysAsId = true)
+    @NotEmpty
     private Collection<Role> roles;
 }
