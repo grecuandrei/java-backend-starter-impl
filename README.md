@@ -1,7 +1,7 @@
 # Store Management API
 
 ## Project Description
-This is a minimal Java Spring Boot &amp; PostgreSQL backend API for managing a store's products.
+This is a minimal Java Spring Boot & PostgreSQL backend API for managing a store's products.
 
 ## Technologies Used
 - Java 21
@@ -10,6 +10,8 @@ This is a minimal Java Spring Boot &amp; PostgreSQL backend API for managing a s
 - PostgreSQL (via Docker)
 - SLF4J and Logback for logging
 - JUnit and Mockito for testing
+- Spring Boot Actuator for health checks and monitoring
+- SpringDoc OpenAPI for API documentation
 
 ## Setup and Installation
 
@@ -37,6 +39,11 @@ This is a minimal Java Spring Boot &amp; PostgreSQL backend API for managing a s
     ./mvnw spring-boot:run
     ```
 
+### Default Admin User
+An admin user is created at startup with the following credentials:
+- Username: `admin`
+- Password: `admin`
+
 ## API Endpoints Examples
 - **Add Product**: `POST /api/products`
 - **Find Product**: `GET /api/products/{id}`
@@ -52,7 +59,17 @@ This is a minimal Java Spring Boot &amp; PostgreSQL backend API for managing a s
 
 ## Logging
 - Configured using SLF4J and Logback.
-- Logs are written to console and rolling files.
+- Logs are written to console and rolling files in the root directory: `logs/`.
+
+## Actuator Endpoints
+- **Health Check**: `GET /actuator/health`
+- **Info**: `GET /actuator/info`
+
+## API Documentation
+- Swagger UI is available at: `http://localhost:8080/swagger-ui.html`
+
+## Postman Collection
+A Postman collection for testing the API endpoints is available in the root directory: `postman/Store Management API.postman_collection.json`
 
 ## Testing
 - Unit tests are written using JUnit and Mockito.
