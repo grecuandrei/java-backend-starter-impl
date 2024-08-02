@@ -26,22 +26,39 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private ProductMapper productMapper;
+
     @InjectMocks
     private ProductService productService;
 
+    private Product product;
+    private ProductDTO productDTO;
+
     @BeforeEach
     void init() {
+        product = Product.builder()
+                .id(UUID.randomUUID())
+                .name("Test Product")
+                .category(Category.FRUITS)
+                .quantity(10)
+                .price(10.0)
+                .build();
+
+        productDTO = ProductDTO.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .category(String.valueOf(Category.FRUITS))
+                .build();
     }
 
     @Test
     @WithMockUser(roles = "USER")
     void getAllProducts() {
-        Product product = new Product();
-        product.setName("Test Product");
-
         when(productRepository.findAll()).thenReturn(List.of(product));
+        when(productMapper.toDTO(any(Product.class))).thenReturn(productDTO);
 
-        List<Product> products = productService.getAllProducts();
+        List<ProductDTO> products = productService.getAllProducts();
 
         assertEquals(1, products.size());
         assertEquals("Test Product", products.getFirst().getName());
@@ -50,14 +67,11 @@ class ProductServiceTest {
     @Test
     @WithMockUser(roles = "USER")
     void getProductById() {
-        UUID id = UUID.randomUUID();
-        Product product = new Product();
-        product.setId(id);
-        product.setName("Test Product");
-
+        UUID id = product.getId();
         when(productRepository.findById(id)).thenReturn(Optional.of(product));
+        when(productMapper.toDTO(any(Product.class))).thenReturn(productDTO);
 
-        Optional<Product> foundProduct = productService.getProductById(id);
+        Optional<ProductDTO> foundProduct = productService.getProductById(id);
 
         assertTrue(foundProduct.isPresent());
         assertEquals("Test Product", foundProduct.get().getName());
@@ -70,7 +84,7 @@ class ProductServiceTest {
 
         when(productRepository.findById(id)).thenReturn(Optional.empty());
 
-        Optional<Product> foundProduct = productService.getProductById(id);
+        Optional<ProductDTO> foundProduct = productService.getProductById(id);
 
         assertFalse(foundProduct.isPresent());
     }
@@ -78,13 +92,12 @@ class ProductServiceTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void createProduct() {
-        Product product = new Product();
-        product.setName("Test Product");
-
         when(productRepository.findByName(product.getName())).thenReturn(Optional.empty());
         when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(productMapper.toDTO(any(Product.class))).thenReturn(productDTO);
+        when(productMapper.toEntity(any(ProductDTO.class))).thenReturn(product);
 
-        Product createdProduct = productService.createProduct(product);
+        ProductDTO createdProduct = productService.createProduct(productDTO);
 
         assertEquals("Test Product", createdProduct.getName());
     }
@@ -92,48 +105,40 @@ class ProductServiceTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void createProductAlreadyExists() {
-        Product product = new Product();
-        product.setName("Test Product");
-
         when(productRepository.findByName(product.getName())).thenReturn(Optional.of(product));
 
-        assertThrows(ProductAlreadyExistsException.class, () -> productService.createProduct(product));
+        assertThrows(ProductAlreadyExistsException.class, () -> productService.createProduct(productDTO));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void updateProduct() {
-        UUID id = UUID.randomUUID();
-        Product existingProduct = new Product();
-        existingProduct.setId(id);
-        existingProduct.setName("Existing Product");
+        UUID id = product.getId();
+        productDTO.setName("Test Product Update");
+        productDTO.setPrice(15.0);
+        when(productRepository.findById(id)).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(productMapper.toDTO(any(Product.class))).thenReturn(productDTO);
 
-        Product updatedProduct = new Product();
-        updatedProduct.setId(id);
-        updatedProduct.setName("Updated Product");
+        ProductDTO updatedProductDTO = productService.updateProduct(productDTO);
 
-        when(productRepository.findById(id)).thenReturn(Optional.of(existingProduct));
-        when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
-
-        Product result = productService.updateProduct(updatedProduct);
-
-        assertEquals("Updated Product", result.getName());
+        assertEquals("Test Product Update", updatedProductDTO.getName());
+        assertEquals(15, updatedProductDTO.getPrice());
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void updateProductNotFound() {
-        Product updatedProduct = new Product();
+        UUID id = productDTO.getId();
+        when(productRepository.findById(id)).thenReturn(Optional.empty());
 
-        when(productRepository.findById(updatedProduct.getId())).thenReturn(Optional.empty());
-
-        assertThrows(ProductNotFoundException.class, () -> productService.updateProduct(updatedProduct));
+        assertThrows(ProductNotFoundException.class, () -> productService.updateProduct(productDTO));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void deleteProduct() {
-        UUID id = UUID.randomUUID();
+        UUID id = product.getId();
 
         when(productRepository.existsById(id)).thenReturn(true);
         doNothing().when(productRepository).deleteById(id);
@@ -157,13 +162,12 @@ class ProductServiceTest {
     @WithMockUser(roles = "USER")
     void getProductsByCategory() {
         Category category = Category.FRUITS;
-        Product product = new Product();
         product.setCategory(category);
-        product.setName("Test Product");
 
         when(productRepository.findByCategory(category)).thenReturn(List.of(product));
+        when(productMapper.toDTO(any(Product.class))).thenReturn(productDTO);
 
-        List<Product> products = productService.getProductsByCategory(category);
+        List<ProductDTO> products = productService.getProductsByCategory(category);
 
         assertEquals(1, products.size());
         assertEquals("Test Product", products.getFirst().getName());
@@ -172,16 +176,19 @@ class ProductServiceTest {
     @Test
     @WithMockUser(roles = "USER")
     void increaseQuantity() {
-        UUID id = UUID.randomUUID();
-        Product product = new Product();
-        product.setId(id);
-        product.setName("Test Product");
-        product.setQuantity(10);
+        UUID id = product.getId();
 
         when(productRepository.findById(id)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(productMapper.toDTO(any(Product.class))).thenAnswer(invocation -> {
+            Product savedProduct = invocation.getArgument(0);
+            return ProductDTO.builder()
+                    .id(savedProduct.getId())
+                    .quantity(savedProduct.getQuantity())
+                    .build();
+        });
 
-        Product updatedProduct = productService.increaseQuantity(id, 5);
+        ProductDTO updatedProduct = productService.increaseQuantity(id, 5);
 
         assertEquals(15, updatedProduct.getQuantity());
     }

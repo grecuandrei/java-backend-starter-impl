@@ -5,9 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IPermissionService {
-    List<Permission> getAllPermissions();
-    Optional<Permission> getPermissionById(UUID id);
-    Permission createPermission(Permission permission);
-    Permission updatePermission(Permission updatedPermission);
+    List<PermissionDTO> getAllPermissions();
+    Optional<PermissionDTO> getPermissionById(UUID id);
+    PermissionDTO createPermission(PermissionDTO permissionDTO);
+    PermissionDTO updatePermission(PermissionDTO updatedPermissionDTO);
     void deletePermission(UUID id);
 }

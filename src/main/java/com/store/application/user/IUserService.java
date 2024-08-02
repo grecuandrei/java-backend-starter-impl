@@ -5,9 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IUserService {
-    List<User> getAllUsers();
-    Optional<User> getUserById(UUID id);
-    User createUser(User user);
-    User updateUser(User updatedUser);
+    List<UserDTO> getAllUsers();
+    Optional<UserDTO> getUserById(UUID id);
+    UserDTO createUser(UserDTO userDTO);
+    UserDTO updateUser(UserDTO updatedUserDTO);
     void deleteUser(UUID id);
 }

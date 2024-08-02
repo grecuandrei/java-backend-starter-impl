@@ -342,7 +342,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"user\",\n    \"password\": \"user\",\n    \"roles\": [\n      {\n        \"id\": \"{{roleId}}\"\n      }\n    ]\n}"
+					"raw": "{\n    \"username\": \"user\",\n    \"password\": \"user\",\n    \"roles\": [\n      \"{{roleId}}\"\n    ]\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/users",

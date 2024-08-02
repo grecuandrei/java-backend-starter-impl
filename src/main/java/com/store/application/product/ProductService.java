@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -20,42 +22,52 @@ public class ProductService implements IProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    @Transactional(readOnly = true)
-    public List<Product> getAllProducts() {
+    @Autowired
+    private ProductMapper productMapper;
+
+    public List<ProductDTO> getAllProducts() {
         log.info("Fetching all products");
-        return productRepository.findAll();
+        return productRepository.findAll().stream()
+                .map(productMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Product> getProductById(UUID id) {
+    public Optional<ProductDTO> getProductById(UUID id) {
         log.info("Fetching product with id: {}", id);
-        return productRepository.findById(id);
+        return productRepository.findById(id).map(productMapper::toDTO);
     }
 
     @Transactional
-    public Product createProduct(Product product) {
-        log.info("Creating new product: {}", product);
-        if (productRepository.findByName(product.getName()).isPresent()) {
-            log.error("Product with name {} already exists", product.getName());
-            throw new ProductAlreadyExistsException("Product already exists with name: " + product.getName());
+    public ProductDTO createProduct(ProductDTO productDTO) {
+        log.info("Creating new product: {}", productDTO.getName());
+        if (productRepository.findByName(productDTO.getName()).isPresent()) {
+            log.error("Product with name {} already exists", productDTO.getName());
+            throw new ProductAlreadyExistsException("Product already exists with name: " + productDTO.getName());
         }
-        return productRepository.save(product);
+        Product product = productMapper.toEntity(productDTO);
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional
-    public Product updateProduct(Product updatedProduct) {
-        log.info("Updating product with id: {}", updatedProduct.getId());
-        return productRepository.findById(updatedProduct.getId()).map(product -> {
-            product.setName(updatedProduct.getName());
-            product.setDescription(updatedProduct.getDescription());
-            product.setCategory(updatedProduct.getCategory());
-            product.setPrice(updatedProduct.getPrice());
-            product.setQuantity(updatedProduct.getQuantity());
-            product.setDiscount(updatedProduct.getDiscount());
+    public ProductDTO updateProduct(ProductDTO updatedProductDTO) {
+        log.info("Updating product with id: {}", updatedProductDTO.getId());
+        return productRepository.findById(updatedProductDTO.getId()).map(product -> {
+            Optional<Product> existingProduct = productRepository.findByName(updatedProductDTO.getName());
+            if (existingProduct.isPresent() && !existingProduct.get().getId().equals(updatedProductDTO.getId())) {
+                log.error("Product with name {} already exists", updatedProductDTO.getName());
+                throw new ProductAlreadyExistsException("Product already exists with name: " + updatedProductDTO.getName());
+            }
+            product.setName(updatedProductDTO.getName());
+            product.setDescription(updatedProductDTO.getDescription());
+            product.setCategory(Category.valueOf(updatedProductDTO.getCategory()));
+            product.setPrice(updatedProductDTO.getPrice());
+            product.setQuantity(updatedProductDTO.getQuantity());
+            product.setDiscount(updatedProductDTO.getDiscount());
             log.info("Updated product: {}", product);
-            return productRepository.save(product);
+            return productMapper.toDTO(productRepository.save(product));
         }).orElseThrow(() -> {
-            log.error("Product not found with id: {}", updatedProduct.getId());
-            return new ProductNotFoundException("Product not found with id: " + updatedProduct.getId());
+            log.error("Product not found with id: {}", updatedProductDTO.getId());
+            return new ProductNotFoundException("Product not found with id: " + updatedProductDTO.getId());
         });
     }
 
@@ -69,17 +81,20 @@ public class ProductService implements IProductService {
         productRepository.deleteById(id);
     }
 
-    public List<Product> getProductsByCategory(Category category) {
-        log.info("Fetching product with category: {}", category.name());
-        return productRepository.findByCategory(category);
+    public List<ProductDTO> getProductsByCategory(Category category) {
+        log.info("Fetching all products by category: {}", category);
+        return productRepository.findByCategory(category).stream()
+                .map(productMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public Product changePrice(UUID id, Double amount) {
-        log.info("Changing price for product with id: {}", id);
+    public ProductDTO changePrice(UUID id, Double amount) {
+        log.info("Changing price of product with id: {}", id);
         return productRepository.findById(id).map(product -> {
             product.setPrice(amount);
-            return productRepository.save(product);
+            log.info("Changed price of product: {}", product);
+            return productMapper.toDTO(productRepository.save(product));
         }).orElseThrow(() -> {
             log.error("Product not found with id: {}", id);
             return new ProductNotFoundException("Product not found with id: " + id);
@@ -87,14 +102,21 @@ public class ProductService implements IProductService {
     }
 
     @Transactional
-    public Product increaseQuantity(UUID id, int amount) {
-        log.info("Increasing quantity for product with id: {}", id);
+    public ProductDTO increaseQuantity(UUID id, int amount) {
+        log.info("Increasing quantity of product with id: {}", id);
         return productRepository.findById(id).map(product -> {
             product.setQuantity(product.getQuantity() + amount);
-            return productRepository.save(product);
+            log.info("Increased quantity of product: {}", product);
+            return productMapper.toDTO(productRepository.save(product));
         }).orElseThrow(() -> {
             log.error("Product not found with id: {}", id);
             return new ProductNotFoundException("Product not found with id: " + id);
         });
+    }
+
+    public List<String> getCategories() {
+        return Arrays.stream(Category.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
     }
 }

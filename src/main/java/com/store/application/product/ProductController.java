@@ -30,9 +30,9 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Successfully fetched all products")
     })
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
         log.info("Fetching all products");
-        List<Product> products = productService.getAllProducts();
+        List<ProductDTO> products = productService.getAllProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
@@ -42,9 +42,9 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@Parameter(description = "Product id to get data for", required = true) @PathVariable UUID id) {
+    public ResponseEntity<ProductDTO> getProductById(@Parameter(description = "Product id to get data for", required = true) @PathVariable UUID id) {
         log.info("Fetching product with id: {}", id);
-        Optional<Product> product = productService.getProductById(id);
+        Optional<ProductDTO> product = productService.getProductById(id);
         return product.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> {
                     log.error("Product not found with id: {}", id);
@@ -59,13 +59,13 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Error creating product")
     })
     @PostMapping
-    public ResponseEntity<Product> createProduct(@Parameter(description = "Product data to create", required = true) @RequestBody Product product) {
-        log.info("Creating new product: {}", product.getName());
+    public ResponseEntity<ProductDTO> createProduct(@Parameter(description = "Product data to create", required = true) @RequestBody ProductDTO productDTO) {
+        log.info("Creating new product: {}", productDTO.getName());
         try {
-            Product createdProduct = productService.createProduct(product);
+            ProductDTO createdProduct = productService.createProduct(productDTO);
             return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
         } catch (ProductAlreadyExistsException e) {
-            log.error("Product already exists with same name: {}", product.getName());
+            log.error("Product already exists with same name: {}", productDTO.getName());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (Exception e) {
             log.error("Error creating product: {}", e.getMessage());
@@ -76,16 +76,20 @@ public class ProductController {
     @Operation(summary = "Updating product with id", tags = { "Product", "put" })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated product"),
-            @ApiResponse(responseCode = "404", description = "Product not found")
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "409", description = "Product with the same name already exists")
     })
     @PutMapping
-    public ResponseEntity<Product> updateProduct(@Parameter(description = "Product with updated data", required = true) @RequestBody Product updatedProduct) {
-        log.info("Updating product with id: {}", updatedProduct.getId());
+    public ResponseEntity<ProductDTO> updateProduct(@Parameter(description = "Product with updated data", required = true) @RequestBody ProductDTO updatedProductDTO) {
+        log.info("Updating product with id: {}", updatedProductDTO.getId());
         try {
-            Product product = productService.updateProduct(updatedProduct);
+            ProductDTO product = productService.updateProduct(updatedProductDTO);
             return new ResponseEntity<>(product, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            log.error("Product not found with id: {}", updatedProduct.getId());
+        } catch (ProductAlreadyExistsException e) {
+            log.error("Product with the same name already exists: {}", updatedProductDTO.getName());
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (ProductNotFoundException e) {
+            log.error("Product not found with id: {}", updatedProductDTO.getId());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -112,13 +116,9 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Successfully fetched products by category")
     })
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<Product>> getProductsByCategory(@Parameter(description = "Get products by category", required = true) @PathVariable Category category) {
+    public ResponseEntity<List<ProductDTO>> getProductsByCategory(@Parameter(description = "Get products by category", required = true) @PathVariable Category category) {
         log.info("Fetching all products by category: {}", category);
-        List<Product> products = productService.getProductsByCategory(category);
-        products.forEach(product -> {
-            double discountedPrice = product.getPrice() - (product.getPrice() * product.getDiscount() / 100);
-            product.setPrice(discountedPrice);
-        });
+        List<ProductDTO> products = productService.getProductsByCategory(category);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
@@ -128,14 +128,14 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @PatchMapping("/{id}/changePrice")
-    public ResponseEntity<Product> changePrice(
+    public ResponseEntity<ProductDTO> changePrice(
             @Parameter(description = "Product id to change the price to", required = true) @PathVariable UUID id,
-            @Parameter(description = "The quantity", required = true) @RequestParam Double amount) {
-        log.info("Changing price to product with id: {}", id);
+            @Parameter(description = "The price", required = true) @RequestParam Double amount) {
+        log.info("Changing price of product with id: {}", id);
         try {
-            Product product = productService.changePrice(id, amount);
+            ProductDTO product = productService.changePrice(id, amount);
             return new ResponseEntity<>(product, HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (ProductNotFoundException e) {
             log.error("Product not found with id: {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -147,16 +147,27 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @PatchMapping("/{id}/increaseQuantity")
-    public ResponseEntity<Product> increaseQuantity(
+    public ResponseEntity<ProductDTO> increaseQuantity(
             @Parameter(description = "Product id to change the quantity to", required = true) @PathVariable UUID id,
             @Parameter(description = "The quantity", required = true) @RequestParam int amount) {
-        log.info("Changing quantity to product with id: {}", id);
+        log.info("Changing quantity of product with id: {}", id);
         try {
-            Product product = productService.increaseQuantity(id, amount);
+            ProductDTO product = productService.increaseQuantity(id, amount);
             return new ResponseEntity<>(product, HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (ProductNotFoundException e) {
             log.error("Product not found with id: {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @Operation(summary = "Fetching available categories", tags = { "Product", "get" })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched categories")
+    })
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getCategories() {
+        log.info("Fetching all categories");
+        List<String> categories = productService.getCategories();
+        return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 }

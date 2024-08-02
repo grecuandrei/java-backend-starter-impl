@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -20,32 +21,39 @@ public class PermissionService implements IPermissionService {
     @Autowired
     private PermissionRepository permissionRepository;
 
-    public List<Permission> getAllPermissions() {
+    @Autowired
+    private PermissionMapper permissionMapper;
+
+    public List<PermissionDTO> getAllPermissions() {
         log.info("Fetching all permissions");
-        return permissionRepository.findAll();
+        return permissionRepository.findAll().stream()
+                .map(permissionMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Permission> getPermissionById(UUID id) {
+    public Optional<PermissionDTO> getPermissionById(UUID id) {
         log.info("Fetching permission with id: {}", id);
-        return permissionRepository.findById(id);
+        return permissionRepository.findById(id)
+                .map(permissionMapper::toDTO);
     }
 
     @Transactional
-    public Permission createPermission(Permission permission) {
-        log.info("Creating new permission: {}", permission);
-        return permissionRepository.save(permission);
+    public PermissionDTO createPermission(PermissionDTO permissionDTO) {
+        log.info("Creating new permission: {}", permissionDTO);
+        Permission permission = permissionMapper.toEntity(permissionDTO);
+        return permissionMapper.toDTO(permissionRepository.save(permission));
     }
 
     @Transactional
-    public Permission updatePermission(Permission updatedPermission) {
-        log.info("Updating permission with id: {}", updatedPermission.getId());
-        return permissionRepository.findById(updatedPermission.getId()).map(permission -> {
-            permission.setName(updatedPermission.getName());
+    public PermissionDTO updatePermission(PermissionDTO updatedPermissionDTO) {
+        log.info("Updating permission with id: {}", updatedPermissionDTO.getId());
+        return permissionRepository.findById(updatedPermissionDTO.getId()).map(permission -> {
+            permission.setName(updatedPermissionDTO.getName());
             log.info("Updated permission: {}", permission);
-            return permissionRepository.save(permission);
+            return permissionMapper.toDTO(permissionRepository.save(permission));
         }).orElseThrow(() -> {
-            log.error("Permission not found with id: {}", updatedPermission.getId());
-            return new PermissionNotFoundException("Permission not found with id: " + updatedPermission.getId());
+            log.error("Permission not found with id: {}", updatedPermissionDTO.getId());
+            return new PermissionNotFoundException("Permission not found with id: " + updatedPermissionDTO.getId());
         });
     }
 

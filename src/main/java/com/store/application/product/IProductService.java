@@ -5,12 +5,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IProductService {
-    List<Product> getAllProducts();
-    Optional<Product> getProductById(UUID id);
-    Product createProduct(Product product);
-    Product updateProduct(Product updatedProduct);
+    List<ProductDTO> getAllProducts();
+    Optional<ProductDTO> getProductById(UUID id);
+    ProductDTO createProduct(ProductDTO productDTO);
+    ProductDTO updateProduct(ProductDTO updatedProductDTO);
     void deleteProduct(UUID id);
-    List<Product> getProductsByCategory(Category category);
-    Product changePrice(UUID id, Double amount);
-    Product increaseQuantity(UUID id, int amount);
+    List<ProductDTO> getProductsByCategory(Category category);
+    ProductDTO changePrice(UUID id, Double amount);
+    ProductDTO increaseQuantity(UUID id, int amount);
 }

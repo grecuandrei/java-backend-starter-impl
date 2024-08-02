@@ -5,10 +5,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IRoleService {
-    List<Role> getAllRoles();
-    Optional<Role> getRoleById(UUID id);
-    List<Role> getRolesForUserId(UUID userId);
-    Role createRole(Role role);
-    Role updateRole(Role role);
+    List<RoleDTO> getAllRoles();
+    Optional<RoleDTO> getRoleById(UUID id);
+    List<RoleDTO> getRolesForUserId(UUID userId);
+    RoleDTO createRole(RoleDTO roleDTO);
+    RoleDTO updateRole(RoleDTO updatedRoleDTO);
     void deleteRole(UUID id);
 }

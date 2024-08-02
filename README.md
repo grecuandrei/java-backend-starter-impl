@@ -78,5 +78,9 @@ A Postman collection for testing the API endpoints is available in the root dire
     ./mvnw test
     ```
 
+## DTOs
+- The API uses Data Transfer Objects (DTOs) to decouple the internal data structures from the API responses and requests.
+- This enhances security and allows more control over the data exposed to the clients.
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

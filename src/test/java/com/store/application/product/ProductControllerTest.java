@@ -38,23 +38,30 @@ public class ProductControllerTest {
 
     private MockMvc mockMvc;
 
+    private ProductDTO productDTO;
+
     @BeforeEach
     public void init() {
         mockMvc = MockMvcBuilders.standaloneSetup(productController).build();
+
+        productDTO = ProductDTO.builder()
+                .id(UUID.randomUUID())
+                .name("Test Product")
+                .category(String.valueOf(Category.FRUITS))
+                .quantity(10)
+                .price(10.0)
+                .build();
     }
 
     @Test
     @WithMockUser(roles = "USER")
     void testGetAllProducts() throws Exception {
-        Product product = new Product();
-        product.setName("Test Product");
-
-        when(productService.getAllProducts()).thenReturn(List.of(product));
+        when(productService.getAllProducts()).thenReturn(List.of(productDTO));
 
         mockMvc.perform(get("/products"))
                 .andExpect(status().isOk());
 
-        ResponseEntity<List<Product>> response = productController.getAllProducts();
+        ResponseEntity<List<ProductDTO>> response = productController.getAllProducts();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
@@ -64,17 +71,12 @@ public class ProductControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void testGetProductById() throws Exception {
-        UUID id = UUID.randomUUID();
-        Product product = new Product();
-        product.setId(id);
-        product.setName("Test Product");
+        when(productService.getProductById(productDTO.getId())).thenReturn(Optional.of(productDTO));
 
-        when(productService.getProductById(id)).thenReturn(Optional.of(product));
-
-        mockMvc.perform(get("/products/" + id))
+        mockMvc.perform(get("/products/" + productDTO.getId()))
                 .andExpect(status().isOk());
 
-        ResponseEntity<Product> response = productController.getProductById(id);
+        ResponseEntity<ProductDTO> response = productController.getProductById(productDTO.getId());
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Test Product", response.getBody().getName());
@@ -90,7 +92,7 @@ public class ProductControllerTest {
         mockMvc.perform(get("/products/" + id))
                 .andExpect(status().isNotFound());
 
-        ResponseEntity<Product> response = productController.getProductById(id);
+        ResponseEntity<ProductDTO> response = productController.getProductById(id);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -98,17 +100,14 @@ public class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void testCreateProduct() throws Exception {
-        Product product = new Product();
-        product.setName("Test Product");
-
-        when(productService.createProduct(any(Product.class))).thenReturn(product);
+        when(productService.createProduct(any(ProductDTO.class))).thenReturn(productDTO);
 
         mockMvc.perform(post("/products")
                         .contentType("application/json")
                         .content("{\"name\":\"Test Product\"}"))
                 .andExpect(status().isCreated());
 
-        ResponseEntity<Product> response = productController.createProduct(product);
+        ResponseEntity<ProductDTO> response = productController.createProduct(productDTO);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("Test Product", response.getBody().getName());
@@ -117,17 +116,14 @@ public class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void testCreateProductConflict() throws Exception {
-        Product product = new Product();
-        product.setName("Test Product");
-
-        when(productService.createProduct(any(Product.class))).thenThrow(new ProductAlreadyExistsException("Product already exists"));
+        when(productService.createProduct(any(ProductDTO.class))).thenThrow(new ProductAlreadyExistsException("Product already exists"));
 
         mockMvc.perform(post("/products")
                         .contentType("application/json")
                         .content("{\"name\":\"Test Product\"}"))
                 .andExpect(status().isConflict());
 
-        ResponseEntity<Product> response = productController.createProduct(product);
+        ResponseEntity<ProductDTO> response = productController.createProduct(productDTO);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
     }
@@ -135,37 +131,32 @@ public class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void testUpdateProduct() throws Exception {
-        UUID id = UUID.randomUUID();
-        Product product = new Product();
-        product.setId(id);
-        product.setName("Updated Product");
+        productDTO.setName("Test Product Update");
 
-        when(productService.updateProduct(any(Product.class))).thenReturn(product);
+        when(productService.updateProduct(any(ProductDTO.class))).thenReturn(productDTO);
 
         mockMvc.perform(put("/products")
                         .contentType("application/json")
-                        .content("{\"name\":\"Updated Product\"}"))
+                        .content("{\"id\":\"" + productDTO.getId() + "\", \"name\":\"Updated Product\"}"))
                 .andExpect(status().isOk());
 
-        ResponseEntity<Product> response = productController.updateProduct(product);
+        ResponseEntity<ProductDTO> response = productController.updateProduct(productDTO);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Updated Product", response.getBody().getName());
+        assertEquals("Test Product Update", response.getBody().getName());
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void testUpdateProductNotFound() throws Exception {
-        Product product = new Product();
-
-        when(productService.updateProduct(any(Product.class))).thenThrow(new ProductNotFoundException("Product not found"));
+        when(productService.updateProduct(any(ProductDTO.class))).thenThrow(new ProductNotFoundException("Product not found"));
 
         mockMvc.perform(put("/products")
                         .contentType("application/json")
-                        .content("{\"name\":\"Updated Product\"}"))
+                        .content("{\"id\":\"" + productDTO.getId() + "\", \"name\":\"Updated Product\"}"))
                 .andExpect(status().isNotFound());
 
-        ResponseEntity<Product> response = productController.updateProduct(product);
+        ResponseEntity<ProductDTO> response = productController.updateProduct(productDTO);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -203,17 +194,12 @@ public class ProductControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void testGetProductsByCategory() throws Exception {
-        Category category = Category.FRUITS;
-        Product product = new Product();
-        product.setCategory(category);
-        product.setName("Test Product");
+        when(productService.getProductsByCategory(Category.FRUITS)).thenReturn(List.of(productDTO));
 
-        when(productService.getProductsByCategory(category)).thenReturn(List.of(product));
-
-        mockMvc.perform(get("/products/category/" + category.name()))
+        mockMvc.perform(get("/products/category/" + Category.FRUITS.name()))
                 .andExpect(status().isOk());
 
-        ResponseEntity<List<Product>> response = productController.getProductsByCategory(category);
+        ResponseEntity<List<ProductDTO>> response = productController.getProductsByCategory(Category.FRUITS);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
@@ -223,18 +209,12 @@ public class ProductControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void testIncreaseQuantity() throws Exception {
-        UUID id = UUID.randomUUID();
-        Product product = new Product();
-        product.setId(id);
-        product.setName("Test Product");
-        product.setQuantity(10);
+        when(productService.increaseQuantity(eq(productDTO.getId()), anyInt())).thenReturn(productDTO);
 
-        when(productService.increaseQuantity(eq(id), anyInt())).thenReturn(product);
-
-        mockMvc.perform(patch("/products/" + id + "/increaseQuantity?amount=5"))
+        mockMvc.perform(patch("/products/" + productDTO.getId() + "/increaseQuantity?amount=5"))
                 .andExpect(status().isOk());
 
-        ResponseEntity<Product> response = productController.increaseQuantity(id, 5);
+        ResponseEntity<ProductDTO> response = productController.increaseQuantity(productDTO.getId(), 5);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(10, response.getBody().getQuantity());
@@ -250,7 +230,7 @@ public class ProductControllerTest {
         mockMvc.perform(patch("/products/" + id + "/increaseQuantity?amount=5"))
                 .andExpect(status().isNotFound());
 
-        ResponseEntity<Product> response = productController.increaseQuantity(id, 5);
+        ResponseEntity<ProductDTO> response = productController.increaseQuantity(id, 5);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
