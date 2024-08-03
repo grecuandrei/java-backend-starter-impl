@@ -14,7 +14,9 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_username", columnList = "username")
+})
 @Builder
 @Getter
 @Setter
@@ -48,7 +50,7 @@ public class User implements Serializable {
     @Column(name = "enabled")
     private boolean enabled = true;
 
-    @ManyToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(

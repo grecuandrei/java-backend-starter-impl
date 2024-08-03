@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,9 +40,9 @@ public class UserController {
             )
     })
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
+    public ResponseEntity<Page<UserDTO>> getAllUsers(Pageable pageable) {
         log.info(LogMessages.FETCHING_ALL_USERS + "{}");
-        List<UserDTO> users = userService.getAllUsers();
+        Page<UserDTO> users = userService.getAllUsers(pageable);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 

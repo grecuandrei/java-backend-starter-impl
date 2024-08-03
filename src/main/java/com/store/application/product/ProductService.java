@@ -6,6 +6,12 @@ import com.store.application.utils.LogMessages;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,19 +32,21 @@ public class ProductService implements IProductService {
     @Autowired
     private ProductMapper productMapper;
 
-    public List<ProductDTO> getAllProducts() {
+    @Cacheable(cacheNames = "products", unless = "#result == null")
+    public Page<ProductDTO> getAllProducts(Pageable pageable) {
         log.info(LogMessages.FETCHING_ALL_PRODUCTS);
-        return productRepository.findAll().stream()
-                .map(productMapper::toDTO)
-                .collect(Collectors.toList());
+        return productRepository.findAll(pageable).map(productMapper::toDTO);
     }
 
+
+    @Cacheable(cacheNames = "products", key = "#id", unless = "#result == null")
     public Optional<ProductDTO> getProductById(UUID id) {
         log.info(LogMessages.FETCHING_PRODUCT + "{}", id);
         return productRepository.findById(id).map(productMapper::toDTO);
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductDTO createProduct(ProductDTO productDTO) {
         log.info(LogMessages.CREATING_PRODUCT + "{}", productDTO.getName());
         if (productRepository.findByName(productDTO.getName()).isPresent()) {
@@ -50,6 +58,7 @@ public class ProductService implements IProductService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductDTO updateProduct(ProductDTO updatedProductDTO) {
         log.info(LogMessages.UPDATING_PRODUCT + "{}", updatedProductDTO.getId());
         return productRepository.findById(updatedProductDTO.getId()).map(product -> {
@@ -73,6 +82,7 @@ public class ProductService implements IProductService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public void deleteProduct(UUID id) {
         log.info(LogMessages.DELETING_PRODUCT + "{}", id);
         if (!productRepository.existsById(id)) {
@@ -82,6 +92,7 @@ public class ProductService implements IProductService {
         productRepository.deleteById(id);
     }
 
+    @Cacheable(cacheNames = "products", key = "#category", unless = "#result == null")
     public List<ProductDTO> getProductsByCategory(Category category) {
         log.info(LogMessages.FETCHING_PRODUCTS_BY_CATEGORY + "{}", category);
         return productRepository.findByCategory(category).stream()
@@ -90,6 +101,7 @@ public class ProductService implements IProductService {
     }
 
     @Transactional
+    @CachePut(cacheNames = "products", key = "#id")
     public ProductDTO changePrice(UUID id, Double amount) {
         log.info(LogMessages.CHANGING_PRICE + "{}", id);
         return productRepository.findById(id).map(product -> {
@@ -103,6 +115,7 @@ public class ProductService implements IProductService {
     }
 
     @Transactional
+    @CachePut(cacheNames = "products", key = "#id")
     public ProductDTO increaseQuantity(UUID id, int amount) {
         log.info(LogMessages.CHANGING_QUANTITY + "{}", id);
         return productRepository.findById(id).map(product -> {

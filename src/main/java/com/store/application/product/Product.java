@@ -10,7 +10,10 @@ import java.io.Serializable;
 import java.util.UUID;
 
 @Entity
-@Table(name = "products")
+@Table(name = "products", indexes = {
+        @Index(name = "idx_name", columnList = "name"),
+        @Index(name = "idx_category", columnList = "category")
+})
 @Builder
 @Getter
 @Setter

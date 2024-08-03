@@ -9,6 +9,10 @@ import com.store.application.utils.LogMessages;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,13 +41,13 @@ public class UserService implements IUserService {
     @Autowired
     private UserMapper userMapper;
 
-    public List<UserDTO> getAllUsers() {
+    @Cacheable(cacheNames = "users", unless = "#result == null")
+    public Page<UserDTO> getAllUsers(Pageable pageable) {
         log.info(LogMessages.FETCHING_ALL_USERS);
-        return userRepository.findAll().stream()
-                .map(userMapper::toDTO)
-                .collect(Collectors.toList());
+        return userRepository.findAll(pageable).map(userMapper::toDTO);
     }
 
+    @Cacheable(cacheNames = "users", key = "#id", unless = "#result == null")
     public Optional<UserDTO> getUserById(UUID id) {
         log.info(LogMessages.FETCHING_USER_BY_ID + "{}", id);
         return userRepository.findById(id)
@@ -51,6 +55,7 @@ public class UserService implements IUserService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "users", allEntries = true)
     public UserDTO createUser(UserDTO userDTO) {
         log.info(LogMessages.CREATING_NEW_USER + "{}", userDTO);
         if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
@@ -59,6 +64,7 @@ public class UserService implements IUserService {
         }
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User user = userMapper.toEntity(userDTO);
+        user.setEnabled(true);
         user.setRoles(userDTO.getRoles().stream()
                 .map(roleId -> roleRepository.findById(roleId)
                         .orElseThrow(() -> new RoleNotFoundException(LogMessages.ROLE_NOT_FOUND + roleId)))
@@ -67,6 +73,7 @@ public class UserService implements IUserService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "users", allEntries = true)
     public UserDTO updateUser(UserDTO updatedUserDTO) {
         log.info(LogMessages.UPDATING_USER + "{}", updatedUserDTO.getId());
         return userRepository.findById(updatedUserDTO.getId()).map(user -> {
@@ -91,6 +98,7 @@ public class UserService implements IUserService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "users", allEntries = true)
     public void deleteUser(UUID id) {
         log.info(LogMessages.DELETING_USER + "{}", id);
         if (!userRepository.existsById(id)) {

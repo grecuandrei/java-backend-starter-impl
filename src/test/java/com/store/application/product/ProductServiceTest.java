@@ -9,6 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.List;
@@ -55,13 +59,16 @@ class ProductServiceTest {
     @Test
     @WithMockUser(roles = "USER")
     void getAllProducts() {
-        when(productRepository.findAll()).thenReturn(List.of(product));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Product> productPage = new PageImpl<>(List.of(product), pageable, 1);
+
+        when(productRepository.findAll(any(Pageable.class))).thenReturn(productPage);
         when(productMapper.toDTO(any(Product.class))).thenReturn(productDTO);
 
-        List<ProductDTO> products = productService.getAllProducts();
+        Page<ProductDTO> products = productService.getAllProducts(pageable);
 
-        assertEquals(1, products.size());
-        assertEquals("Test Product", products.getFirst().getName());
+        assertEquals(1, products.getTotalElements());
+        assertEquals("Test Product", products.getContent().getFirst().getName());
     }
 
     @Test

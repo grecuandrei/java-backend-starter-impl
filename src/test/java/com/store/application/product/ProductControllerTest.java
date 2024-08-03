@@ -9,6 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -56,16 +60,21 @@ public class ProductControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void testGetAllProducts() throws Exception {
-        when(productService.getAllProducts()).thenReturn(List.of(productDTO));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ProductDTO> page = new PageImpl<>(List.of(productDTO), pageable, 1);
 
-        mockMvc.perform(get("/products"))
+        when(productService.getAllProducts(any(Pageable.class))).thenReturn(page);
+
+        mockMvc.perform(get("/products")
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk());
 
-        ResponseEntity<List<ProductDTO>> response = productController.getAllProducts();
+        ResponseEntity<Page<ProductDTO>> response = productController.getAllProducts(pageable);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(1, response.getBody().size());
-        assertEquals("Test Product", response.getBody().getFirst().getName());
+        assertEquals(1, response.getBody().getContent().size());
+        assertEquals("Test Product", response.getBody().getContent().getFirst().getName());
     }
 
     @Test
