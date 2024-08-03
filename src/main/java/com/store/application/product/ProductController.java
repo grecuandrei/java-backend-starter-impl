@@ -2,6 +2,7 @@ package com.store.application.product;
 
 import com.store.application.exceptions.ProductAlreadyExistsException;
 import com.store.application.exceptions.ProductNotFoundException;
+import com.store.application.utils.LogMessages;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,7 +32,7 @@ public class ProductController {
     })
     @GetMapping
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
-        log.info("Fetching all products");
+        log.info(LogMessages.FETCHING_ALL_PRODUCTS);
         List<ProductDTO> products = productService.getAllProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
@@ -43,11 +44,11 @@ public class ProductController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProductById(@Parameter(description = "Product id to get data for", required = true) @PathVariable UUID id) {
-        log.info("Fetching product with id: {}", id);
+        log.info(LogMessages.FETCHING_PRODUCT + "{}", id);
         Optional<ProductDTO> product = productService.getProductById(id);
         return product.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> {
-                    log.error("Product not found with id: {}", id);
+                    log.error(LogMessages.PRODUCT_NOT_FOUND_BY_ID + "{}", id);
                     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
                 });
     }
@@ -60,15 +61,15 @@ public class ProductController {
     })
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(@Parameter(description = "Product data to create", required = true) @RequestBody ProductDTO productDTO) {
-        log.info("Creating new product: {}", productDTO.getName());
+        log.info(LogMessages.CREATING_PRODUCT + "{}", productDTO.getName());
         try {
             ProductDTO createdProduct = productService.createProduct(productDTO);
             return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
         } catch (ProductAlreadyExistsException e) {
-            log.error("Product already exists with same name: {}", productDTO.getName());
+            log.error(LogMessages.PRODUCT_ALREADY_EXISTS + "{}", productDTO.getName());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (Exception e) {
-            log.error("Error creating product: {}", e.getMessage());
+            log.error(LogMessages.ERROR_CREATING_PRODUCT + "{}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -81,15 +82,15 @@ public class ProductController {
     })
     @PutMapping
     public ResponseEntity<ProductDTO> updateProduct(@Parameter(description = "Product with updated data", required = true) @RequestBody ProductDTO updatedProductDTO) {
-        log.info("Updating product with id: {}", updatedProductDTO.getId());
+        log.info(LogMessages.UPDATING_PRODUCT + "{}", updatedProductDTO.getId());
         try {
             ProductDTO product = productService.updateProduct(updatedProductDTO);
             return new ResponseEntity<>(product, HttpStatus.OK);
         } catch (ProductAlreadyExistsException e) {
-            log.error("Product with the same name already exists: {}", updatedProductDTO.getName());
+            log.error(LogMessages.PRODUCT_ALREADY_EXISTS + "{}", updatedProductDTO.getName());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (ProductNotFoundException e) {
-            log.error("Product not found with id: {}", updatedProductDTO.getId());
+            log.error(LogMessages.PRODUCT_NOT_FOUND_BY_ID + "{}", updatedProductDTO.getId());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -101,12 +102,12 @@ public class ProductController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@Parameter(description = "Product id to delete data for", required = true) @PathVariable UUID id) {
-        log.info("Deleting product with id: {}", id);
+        log.info(LogMessages.DELETING_PRODUCT + "{}", id);
         try {
             productService.deleteProduct(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (ProductNotFoundException e) {
-            log.error("Product not found with id: {}", id);
+            log.error(LogMessages.PRODUCT_NOT_FOUND_BY_ID + "{}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -117,7 +118,7 @@ public class ProductController {
     })
     @GetMapping("/category/{category}")
     public ResponseEntity<List<ProductDTO>> getProductsByCategory(@Parameter(description = "Get products by category", required = true) @PathVariable Category category) {
-        log.info("Fetching all products by category: {}", category);
+        log.info(LogMessages.FETCHING_PRODUCTS_BY_CATEGORY + "{}", category);
         List<ProductDTO> products = productService.getProductsByCategory(category);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
@@ -131,12 +132,12 @@ public class ProductController {
     public ResponseEntity<ProductDTO> changePrice(
             @Parameter(description = "Product id to change the price to", required = true) @PathVariable UUID id,
             @Parameter(description = "The price", required = true) @RequestParam Double amount) {
-        log.info("Changing price of product with id: {}", id);
+        log.info(LogMessages.CHANGING_PRICE + "{}", id);
         try {
             ProductDTO product = productService.changePrice(id, amount);
             return new ResponseEntity<>(product, HttpStatus.OK);
         } catch (ProductNotFoundException e) {
-            log.error("Product not found with id: {}", id);
+            log.error(LogMessages.PRODUCT_NOT_FOUND_BY_ID + "{}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -150,12 +151,12 @@ public class ProductController {
     public ResponseEntity<ProductDTO> increaseQuantity(
             @Parameter(description = "Product id to change the quantity to", required = true) @PathVariable UUID id,
             @Parameter(description = "The quantity", required = true) @RequestParam int amount) {
-        log.info("Changing quantity of product with id: {}", id);
+        log.info(LogMessages.CHANGING_QUANTITY + "{}", id);
         try {
             ProductDTO product = productService.increaseQuantity(id, amount);
             return new ResponseEntity<>(product, HttpStatus.OK);
         } catch (ProductNotFoundException e) {
-            log.error("Product not found with id: {}", id);
+            log.error(LogMessages.PRODUCT_NOT_FOUND_BY_ID + "{}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

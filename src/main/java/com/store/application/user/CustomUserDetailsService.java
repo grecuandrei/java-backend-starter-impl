@@ -1,5 +1,6 @@
 package com.store.application.user;
 
+import com.store.application.utils.LogMessages;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> {
-                    log.error("User not found with username: {}", username);
+                    log.error(LogMessages.USER_NOT_FOUND + "{}", username);
                     return new UsernameNotFoundException("User not found");
                 });
 

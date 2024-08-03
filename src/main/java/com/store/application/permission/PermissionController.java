@@ -1,6 +1,7 @@
 package com.store.application.permission;
 
 import com.store.application.exceptions.PermissionNotFoundException;
+import com.store.application.utils.LogMessages;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,7 +34,7 @@ public class PermissionController {
     })
     @GetMapping
     public ResponseEntity<List<PermissionDTO>> getAllPermissions() {
-        log.info("Fetching all permissions");
+        log.info(LogMessages.FETCH_ALL_PERMISSIONS + "{}");
         List<PermissionDTO> permissions = permissionService.getAllPermissions();
         return new ResponseEntity<>(permissions, HttpStatus.OK);
     }
@@ -45,11 +46,11 @@ public class PermissionController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<PermissionDTO> getPermissionById(@Parameter(description = "Permission id to get data for", required = true) @PathVariable UUID id) {
-        log.info("Fetching permission with id: {}", id);
+        log.info(LogMessages.FETCH_PERMISSION_BY_ID + "{}", id);
         Optional<PermissionDTO> permission = permissionService.getPermissionById(id);
         return permission.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> {
-                    log.error("Permission not found with id: {}", id);
+                    log.error(LogMessages.PERMISSION_NOT_FOUND + "{}", id);
                     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
                 });
     }
@@ -60,7 +61,7 @@ public class PermissionController {
     })
     @PostMapping
     public ResponseEntity<PermissionDTO> createPermission(@Parameter(description = "Permission data to create", required = true) @RequestBody PermissionDTO permissionDTO) {
-        log.info("Creating new permission: {}", permissionDTO.getName());
+        log.info(LogMessages.CREATE_NEW_PERMISSION + "{}", permissionDTO.getName());
         PermissionDTO createdPermission = permissionService.createPermission(permissionDTO);
         return new ResponseEntity<>(createdPermission, HttpStatus.CREATED);
     }
@@ -72,12 +73,12 @@ public class PermissionController {
     })
     @PutMapping
     public ResponseEntity<PermissionDTO> updatePermission(@Parameter(description = "Permission with updated data", required = true) @RequestBody PermissionDTO updatedPermissionDTO) {
-        log.info("Updating permission with id: {}", updatedPermissionDTO.getId());
+        log.info(LogMessages.UPDATE_PERMISSION + "{}", updatedPermissionDTO.getId());
         try {
             PermissionDTO permission = permissionService.updatePermission(updatedPermissionDTO);
             return new ResponseEntity<>(permission, HttpStatus.OK);
         } catch (PermissionNotFoundException e) {
-            log.error("Permission not found with id: {}", updatedPermissionDTO.getId());
+            log.error(LogMessages.PERMISSION_NOT_FOUND + "{}", updatedPermissionDTO.getId());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -89,12 +90,12 @@ public class PermissionController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePermission(@Parameter(description = "Permission id to delete", required = true) @PathVariable UUID id) {
-        log.info("Deleting permission with id: {}", id);
+        log.info(LogMessages.DELETE_PERMISSION + "{}", id);
         try {
             permissionService.deletePermission(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (PermissionNotFoundException e) {
-            log.error("Permission not found with id: {}", id);
+            log.error(LogMessages.PERMISSION_NOT_FOUND + "{}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

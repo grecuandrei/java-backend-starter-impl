@@ -2,6 +2,7 @@ package com.store.application.product;
 
 import com.store.application.exceptions.ProductAlreadyExistsException;
 import com.store.application.exceptions.ProductNotFoundException;
+import com.store.application.utils.LogMessages;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,23 +27,23 @@ public class ProductService implements IProductService {
     private ProductMapper productMapper;
 
     public List<ProductDTO> getAllProducts() {
-        log.info("Fetching all products");
+        log.info(LogMessages.FETCHING_ALL_PRODUCTS);
         return productRepository.findAll().stream()
                 .map(productMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<ProductDTO> getProductById(UUID id) {
-        log.info("Fetching product with id: {}", id);
+        log.info(LogMessages.FETCHING_PRODUCT + "{}", id);
         return productRepository.findById(id).map(productMapper::toDTO);
     }
 
     @Transactional
     public ProductDTO createProduct(ProductDTO productDTO) {
-        log.info("Creating new product: {}", productDTO.getName());
+        log.info(LogMessages.CREATING_PRODUCT + "{}", productDTO.getName());
         if (productRepository.findByName(productDTO.getName()).isPresent()) {
-            log.error("Product with name {} already exists", productDTO.getName());
-            throw new ProductAlreadyExistsException("Product already exists with name: " + productDTO.getName());
+            log.error(LogMessages.PRODUCT_ALREADY_EXISTS + "{}", productDTO.getName());
+            throw new ProductAlreadyExistsException(LogMessages.PRODUCT_ALREADY_EXISTS + productDTO.getName());
         }
         Product product = productMapper.toEntity(productDTO);
         return productMapper.toDTO(productRepository.save(product));
@@ -50,12 +51,12 @@ public class ProductService implements IProductService {
 
     @Transactional
     public ProductDTO updateProduct(ProductDTO updatedProductDTO) {
-        log.info("Updating product with id: {}", updatedProductDTO.getId());
+        log.info(LogMessages.UPDATING_PRODUCT + "{}", updatedProductDTO.getId());
         return productRepository.findById(updatedProductDTO.getId()).map(product -> {
             Optional<Product> existingProduct = productRepository.findByName(updatedProductDTO.getName());
             if (existingProduct.isPresent() && !existingProduct.get().getId().equals(updatedProductDTO.getId())) {
-                log.error("Product with name {} already exists", updatedProductDTO.getName());
-                throw new ProductAlreadyExistsException("Product already exists with name: " + updatedProductDTO.getName());
+                log.error(LogMessages.PRODUCT_ALREADY_EXISTS + "{}", updatedProductDTO.getName());
+                throw new ProductAlreadyExistsException(LogMessages.PRODUCT_ALREADY_EXISTS + updatedProductDTO.getName());
             }
             product.setName(updatedProductDTO.getName());
             product.setDescription(updatedProductDTO.getDescription());
@@ -63,26 +64,26 @@ public class ProductService implements IProductService {
             product.setPrice(updatedProductDTO.getPrice());
             product.setQuantity(updatedProductDTO.getQuantity());
             product.setDiscount(updatedProductDTO.getDiscount());
-            log.info("Updated product: {}", product);
+            log.info(LogMessages.UPDATED_PRODUCT + "{}", product);
             return productMapper.toDTO(productRepository.save(product));
         }).orElseThrow(() -> {
-            log.error("Product not found with id: {}", updatedProductDTO.getId());
-            return new ProductNotFoundException("Product not found with id: " + updatedProductDTO.getId());
+            log.error(LogMessages.PRODUCT_NOT_FOUND_BY_ID + "{}", updatedProductDTO.getId());
+            return new ProductNotFoundException(LogMessages.PRODUCT_NOT_FOUND_BY_ID + updatedProductDTO.getId());
         });
     }
 
     @Transactional
     public void deleteProduct(UUID id) {
-        log.info("Deleting product with id: {}", id);
+        log.info(LogMessages.DELETING_PRODUCT + "{}", id);
         if (!productRepository.existsById(id)) {
-            log.error("Product not found with id: {}", id);
-            throw new ProductNotFoundException("Product not found with id: " + id);
+            log.error(LogMessages.PRODUCT_NOT_FOUND_BY_ID + "{}", id);
+            throw new ProductNotFoundException(LogMessages.PRODUCT_NOT_FOUND_BY_ID + id);
         }
         productRepository.deleteById(id);
     }
 
     public List<ProductDTO> getProductsByCategory(Category category) {
-        log.info("Fetching all products by category: {}", category);
+        log.info(LogMessages.FETCHING_PRODUCTS_BY_CATEGORY + "{}", category);
         return productRepository.findByCategory(category).stream()
                 .map(productMapper::toDTO)
                 .collect(Collectors.toList());
@@ -90,27 +91,27 @@ public class ProductService implements IProductService {
 
     @Transactional
     public ProductDTO changePrice(UUID id, Double amount) {
-        log.info("Changing price of product with id: {}", id);
+        log.info(LogMessages.CHANGING_PRICE + "{}", id);
         return productRepository.findById(id).map(product -> {
             product.setPrice(amount);
-            log.info("Changed price of product: {}", product);
+            log.info(LogMessages.CHANGING_PRICE + "{}", id);
             return productMapper.toDTO(productRepository.save(product));
         }).orElseThrow(() -> {
-            log.error("Product not found with id: {}", id);
-            return new ProductNotFoundException("Product not found with id: " + id);
+            log.error(LogMessages.PRODUCT_NOT_FOUND_BY_ID + "{}", id);
+            return new ProductNotFoundException(LogMessages.PRODUCT_NOT_FOUND_BY_ID + id);
         });
     }
 
     @Transactional
     public ProductDTO increaseQuantity(UUID id, int amount) {
-        log.info("Increasing quantity of product with id: {}", id);
+        log.info(LogMessages.CHANGING_QUANTITY + "{}", id);
         return productRepository.findById(id).map(product -> {
             product.setQuantity(product.getQuantity() + amount);
-            log.info("Increased quantity of product: {}", product);
+            log.info(LogMessages.CHANGING_QUANTITY + "{}", id);
             return productMapper.toDTO(productRepository.save(product));
         }).orElseThrow(() -> {
-            log.error("Product not found with id: {}", id);
-            return new ProductNotFoundException("Product not found with id: " + id);
+            log.error(LogMessages.PRODUCT_NOT_FOUND_BY_ID + "{}", id);
+            return new ProductNotFoundException(LogMessages.PRODUCT_NOT_FOUND_BY_ID + id);
         });
     }
 

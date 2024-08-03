@@ -5,6 +5,7 @@ import com.store.application.exceptions.UserAlreadyExistsException;
 import com.store.application.exceptions.UserNotFoundException;
 import com.store.application.role.Role;
 import com.store.application.role.RoleRepository;
+import com.store.application.utils.LogMessages;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,64 +38,64 @@ public class UserService implements IUserService {
     private UserMapper userMapper;
 
     public List<UserDTO> getAllUsers() {
-        log.info("Fetching all users");
+        log.info(LogMessages.FETCHING_ALL_USERS);
         return userRepository.findAll().stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<UserDTO> getUserById(UUID id) {
-        log.info("Fetching user with id: {}", id);
+        log.info(LogMessages.FETCHING_USER_BY_ID + "{}", id);
         return userRepository.findById(id)
                 .map(userMapper::toDTO);
     }
 
     @Transactional
     public UserDTO createUser(UserDTO userDTO) {
-        log.info("Creating new user: {}", userDTO);
+        log.info(LogMessages.CREATING_NEW_USER + "{}", userDTO);
         if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
-            log.error("User with username {} already exists", userDTO.getUsername());
-            throw new UserAlreadyExistsException("User with username " + userDTO.getUsername() + " already exists");
+            log.error(String.format(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername()));
+            throw new UserAlreadyExistsException(String.format(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername()));
         }
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User user = userMapper.toEntity(userDTO);
         user.setRoles(userDTO.getRoles().stream()
                 .map(roleId -> roleRepository.findById(roleId)
-                        .orElseThrow(() -> new RoleNotFoundException("Role not found with id: " + roleId)))
+                        .orElseThrow(() -> new RoleNotFoundException(LogMessages.ROLE_NOT_FOUND + roleId)))
                 .collect(Collectors.toList()));
         return userMapper.toDTO(userRepository.save(user));
     }
 
     @Transactional
     public UserDTO updateUser(UserDTO updatedUserDTO) {
-        log.info("Updating user with id: {}", updatedUserDTO.getId());
+        log.info(LogMessages.UPDATING_USER + "{}", updatedUserDTO.getId());
         return userRepository.findById(updatedUserDTO.getId()).map(user -> {
             Optional<User> userWithSameUsername = userRepository.findByUsername(updatedUserDTO.getUsername());
             if (userWithSameUsername.isPresent() && !userWithSameUsername.get().getId().equals(updatedUserDTO.getId())) {
-                log.error("Username {} already exists for another user", updatedUserDTO.getUsername());
-                throw new UserAlreadyExistsException("Username " + updatedUserDTO.getUsername() + " already exists for another user");
+                log.error(String.format(LogMessages.USERNAME_ALREADY_EXISTS, updatedUserDTO.getUsername()));
+                throw new UserAlreadyExistsException(String.format(LogMessages.USERNAME_ALREADY_EXISTS, updatedUserDTO.getUsername()));
             }
 
             user.setUsername(updatedUserDTO.getUsername());
             user.setPassword(passwordEncoder.encode(updatedUserDTO.getPassword()));
             Collection<Role> roles = updatedUserDTO.getRoles().stream()
-                    .map(roleId -> roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException("Role not found with id: " + roleId)))
+                    .map(roleId -> roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(LogMessages.ROLE_NOT_FOUND + roleId)))
                     .collect(Collectors.toList());
             user.setRoles(roles);
-            log.info("Updated user: {}", user);
+            log.info(LogMessages.UPDATED_USER + "{}", user);
             return userMapper.toDTO(userRepository.save(user));
         }).orElseThrow(() -> {
-            log.error("User not found with id: {}", updatedUserDTO.getId());
-            return new UserNotFoundException("User not found with id: " + updatedUserDTO.getId());
+            log.error(LogMessages.USER_NOT_FOUND_BY_ID + "{}", updatedUserDTO.getId());
+            return new UserNotFoundException(LogMessages.USER_NOT_FOUND_BY_ID + updatedUserDTO.getId());
         });
     }
 
     @Transactional
     public void deleteUser(UUID id) {
-        log.info("Deleting user with id: {}", id);
+        log.info(LogMessages.DELETING_USER + "{}", id);
         if (!userRepository.existsById(id)) {
-            log.error("User not found with id: {}", id);
-            throw new UserNotFoundException("User not found with id: " + id);
+            log.error(LogMessages.USER_NOT_FOUND_BY_ID + "{}", id);
+            throw new UserNotFoundException(LogMessages.USER_NOT_FOUND_BY_ID + id);
         }
         userRepository.deleteById(id);
     }

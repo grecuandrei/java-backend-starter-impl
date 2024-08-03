@@ -3,6 +3,7 @@ package com.store.application.user;
 import com.store.application.exceptions.RoleNotFoundException;
 import com.store.application.exceptions.UserAlreadyExistsException;
 import com.store.application.exceptions.UserNotFoundException;
+import com.store.application.utils.LogMessages;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,7 +39,7 @@ public class UserController {
     })
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
-        log.info("Fetching all users");
+        log.info(LogMessages.FETCHING_ALL_USERS + "{}");
         List<UserDTO> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -50,7 +51,7 @@ public class UserController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@Parameter(description = "User id to get data for", required = true) @PathVariable UUID id) {
-        log.info("Fetching user with id: {}", id);
+        log.info(LogMessages.FETCHING_USER_BY_ID + "{}", id);
         Optional<UserDTO> user = userService.getUserById(id);
         return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -64,15 +65,15 @@ public class UserController {
     })
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@Parameter(description = "User data to create", required = true) @RequestBody UserDTO user) {
-        log.info("Creating new user: {}", user);
+        log.info(LogMessages.CREATING_NEW_USER + "{}", user);
         try {
             UserDTO createdUser = userService.createUser(user);
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
         } catch (UserAlreadyExistsException e) {
-            log.error("Error creating user: {}", e.getMessage());
+            log.error(LogMessages.ERROR_CREATING_USER + "{}", e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         } catch (RoleNotFoundException e) {
-            log.error("Role not found: {}", e.getMessage());
+            log.error(LogMessages.ROLE_NOT_FOUND + "{}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -85,18 +86,18 @@ public class UserController {
     })
     @PutMapping
     public ResponseEntity<UserDTO> updateUser(@Parameter(description = "User with updated data", required = true) @RequestBody UserDTO updatedUser) {
-        log.info("Updating user with id: {}", updatedUser.getId());
+        log.info(LogMessages.UPDATING_USER + "{}", updatedUser.getId());
         try {
             UserDTO user = userService.updateUser(updatedUser);
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (UserNotFoundException e) {
-            log.error("User not found with id: {}", updatedUser.getId());
+            log.error(LogMessages.USER_NOT_FOUND + "{}", updatedUser.getId());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (RoleNotFoundException e) {
-            log.error("Role not found: {}", e.getMessage());
+            log.error(LogMessages.ROLE_NOT_FOUND + "{}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (UserAlreadyExistsException e) {
-            log.error("Username already exists for another user: {}", e.getMessage());
+            log.error(LogMessages.USERNAME_ALREADY_EXISTS + "{}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -108,12 +109,12 @@ public class UserController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@Parameter(description = "User id to delete data for", required = true) @PathVariable UUID id) {
-        log.info("Deleting user with id: {}", id);
+        log.info(LogMessages.DELETING_USER + "{}", id);
         try {
             userService.deleteUser(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (UserNotFoundException e) {
-            log.error("User not found with id: {}", id);
+            log.error(LogMessages.USER_NOT_FOUND + "{}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
