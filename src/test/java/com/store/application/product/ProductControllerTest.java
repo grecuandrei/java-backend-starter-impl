@@ -1,5 +1,6 @@
 package com.store.application.product;
 
+import com.store.application.configs.SpringDocConfig;
 import com.store.application.exceptions.ProductAlreadyExistsException;
 import com.store.application.exceptions.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,11 +24,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -68,9 +71,11 @@ public class ProductControllerTest {
         mockMvc.perform(get("/products")
                         .param("page", "0")
                         .param("size", "10"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name").value("Test Product"));
 
-        ResponseEntity<Page<ProductDTO>> response = productController.getAllProducts(pageable);
+        ResponseEntity<Page<ProductDTO>> response = productController.getAllProducts(0, 10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().getContent().size());

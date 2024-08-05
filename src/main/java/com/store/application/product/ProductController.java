@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +34,10 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Successfully fetched all products")
     })
     @GetMapping
-    public ResponseEntity<Page<ProductDTO>> getAllProducts(Pageable pageable) {
+    public ResponseEntity<Page<ProductDTO>> getAllProducts(@RequestParam("page") int pageIndex,
+                                                           @RequestParam("size") int pageSize) {
         log.info(LogMessages.FETCHING_ALL_PRODUCTS);
-        Page<ProductDTO> products = productService.getAllProducts(pageable);
+        Page<ProductDTO> products = productService.getAllProducts(PageRequest.of(pageIndex, pageSize));
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 

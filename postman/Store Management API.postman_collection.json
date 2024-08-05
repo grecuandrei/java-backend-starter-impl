@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "5add0a2a-fe93-4c75-8a85-5484160a9646",
-		"name": "Store Management API",
+		"_postman_id": "b163c448-53da-43f4-b55b-31046f5c8b1e",
+		"name": "Store Management API 2",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "11279993"
 	},
@@ -27,13 +27,23 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{baseUrl}}/api/products",
+					"raw": "{{baseUrl}}/api/products?page=0&size=10",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
 						"products"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						}
 					]
 				}
 			},
@@ -303,13 +313,23 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{baseUrl}}/api/users",
+					"raw": "{{baseUrl}}/api/users?page=0&size=10",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
 						"users"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						}
 					]
 				}
 			},
