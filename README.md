@@ -28,18 +28,13 @@ This is a minimal Java Spring backend API for managing a store's products.
     ```bash
     git clone https://github.com/grecuandrei/store-management.git
     ```
-2. Navigate to the project directory:
+2. Navigate to the project directory where Dockerfile:
     ```bash
     cd store-management
     ```
-3. Start the PostgreSQL database using Docker:
+3. Build and run the Docker containers:
     ```bash
-    docker-compose up -d
-    ```
-4. Build and run the application:
-    ```bash
-    ./mvnw clean install
-    ./mvnw spring-boot:run
+    docker-compose up --build
     ```
 
 ### Default Admin User
