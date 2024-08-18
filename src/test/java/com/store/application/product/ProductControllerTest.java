@@ -1,6 +1,5 @@
 package com.store.application.product;
 
-import com.store.application.configs.SpringDocConfig;
 import com.store.application.exceptions.ProductAlreadyExistsException;
 import com.store.application.exceptions.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
