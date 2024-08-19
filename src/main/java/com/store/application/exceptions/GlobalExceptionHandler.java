@@ -1,7 +1,9 @@
 package com.store.application.exceptions;
 
+import com.store.application.utils.LogMessages;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -11,11 +13,13 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.Date;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProductAlreadyExistsException.class)
     public ResponseEntity<?> handlePermissionNotFoundException(PermissionNotFoundException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
+        log.error(LogMessages.PERMISSION_NOT_FOUND + "{}", ex.getMessage(), ex);
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 

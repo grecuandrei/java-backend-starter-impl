@@ -5,11 +5,9 @@ import com.store.application.exceptions.ProductNotFoundException;
 import com.store.application.utils.LogMessages;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,10 +24,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @AllArgsConstructor
 public class ProductService implements IProductService {
-    @Autowired
     private ProductRepository productRepository;
 
-    @Autowired
     private ProductMapper productMapper;
 
     @Cacheable(cacheNames = "products", unless = "#result == null")

@@ -8,11 +8,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +23,9 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/products")
 @Slf4j
+@AllArgsConstructor
 @Tag(name = "Product", description = "Product management APIs")
 public class ProductController {
-    @Autowired
     private ProductService productService;
 
     @Operation(summary = "Fetching all products", tags = { "Product", "get" })

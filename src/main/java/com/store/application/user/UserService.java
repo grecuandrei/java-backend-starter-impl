@@ -8,7 +8,6 @@ import com.store.application.role.RoleRepository;
 import com.store.application.utils.LogMessages;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,16 +27,12 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UserService implements IUserService {
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
     private UserMapper userMapper;
 
     @Cacheable(cacheNames = "users", unless = "#result == null")
@@ -58,7 +52,7 @@ public class UserService implements IUserService {
     @CacheEvict(cacheNames = "users", allEntries = true)
     public UserDTO createUser(UserDTO userDTO) {
         log.info(LogMessages.CREATING_NEW_USER + "{}", userDTO);
-        if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
+        if (userRepository.findByUsername(userDTO.getUsername()) != null) {
             log.error(String.format(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername()));
             throw new UserAlreadyExistsException(String.format(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername()));
         }
@@ -77,8 +71,8 @@ public class UserService implements IUserService {
     public UserDTO updateUser(UserDTO updatedUserDTO) {
         log.info(LogMessages.UPDATING_USER + "{}", updatedUserDTO.getId());
         return userRepository.findById(updatedUserDTO.getId()).map(user -> {
-            Optional<User> userWithSameUsername = userRepository.findByUsername(updatedUserDTO.getUsername());
-            if (userWithSameUsername.isPresent() && !userWithSameUsername.get().getId().equals(updatedUserDTO.getId())) {
+            User userWithSameUsername = userRepository.findByUsername(updatedUserDTO.getUsername());
+            if (userWithSameUsername != null && !userWithSameUsername.getId().equals(updatedUserDTO.getId())) {
                 log.error(String.format(LogMessages.USERNAME_ALREADY_EXISTS, updatedUserDTO.getUsername()));
                 throw new UserAlreadyExistsException(String.format(LogMessages.USERNAME_ALREADY_EXISTS, updatedUserDTO.getUsername()));
             }

@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +20,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/permissions")
+@AllArgsConstructor
 @Slf4j
 public class PermissionController {
-    @Autowired
     private PermissionService permissionService;
 
     @Operation(summary = "Fetching all permissions", tags = { "permission", "get" })
@@ -47,12 +47,8 @@ public class PermissionController {
     @GetMapping("/{id}")
     public ResponseEntity<PermissionDTO> getPermissionById(@Parameter(description = "Permission id to get data for", required = true) @PathVariable UUID id) {
         log.info(LogMessages.FETCH_PERMISSION_BY_ID + "{}", id);
-        Optional<PermissionDTO> permission = permissionService.getPermissionById(id);
-        return permission.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> {
-                    log.error(LogMessages.PERMISSION_NOT_FOUND + "{}", id);
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-                });
+        PermissionDTO permission = permissionService.getPermissionById(id);
+        return new ResponseEntity<>(permission, HttpStatus.OK);
     }
 
     @Operation(summary = "Creating new permission", tags = { "permission", "post" })
@@ -74,13 +70,9 @@ public class PermissionController {
     @PutMapping
     public ResponseEntity<PermissionDTO> updatePermission(@Parameter(description = "Permission with updated data", required = true) @RequestBody PermissionDTO updatedPermissionDTO) {
         log.info(LogMessages.UPDATE_PERMISSION + "{}", updatedPermissionDTO.getId());
-        try {
-            PermissionDTO permission = permissionService.updatePermission(updatedPermissionDTO);
-            return new ResponseEntity<>(permission, HttpStatus.OK);
-        } catch (PermissionNotFoundException e) {
-            log.error(LogMessages.PERMISSION_NOT_FOUND + "{}", updatedPermissionDTO.getId());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        PermissionDTO permission = permissionService.updatePermission(updatedPermissionDTO);
+        log.info(LogMessages.UPDATED_PERMISSION + "{}", permission);
+        return new ResponseEntity<>(permission, HttpStatus.OK);
     }
 
     @Operation(summary = "Deleting permission with id", tags = { "permission", "delete" })
@@ -91,12 +83,7 @@ public class PermissionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePermission(@Parameter(description = "Permission id to delete", required = true) @PathVariable UUID id) {
         log.info(LogMessages.DELETE_PERMISSION + "{}", id);
-        try {
-            permissionService.deletePermission(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (PermissionNotFoundException e) {
-            log.error(LogMessages.PERMISSION_NOT_FOUND + "{}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        permissionService.deletePermission(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

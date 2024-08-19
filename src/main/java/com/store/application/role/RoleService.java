@@ -10,7 +10,6 @@ import com.store.application.user.UserRepository;
 import com.store.application.utils.LogMessages;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,16 +22,12 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class RoleService implements IRoleService {
 
-    @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private PermissionRepository permissionRepository;
 
-    @Autowired
     private RoleMapper roleMapper;
 
     public List<RoleDTO> getAllRoles() {
@@ -60,7 +55,7 @@ public class RoleService implements IRoleService {
     @Transactional
     public RoleDTO createRole(RoleDTO roleDTO) {
         log.info(LogMessages.CREATE_NEW_ROLE + "{}", roleDTO.getName());
-        if (roleRepository.findByName(roleDTO.getName()).isPresent()) {
+        if (roleRepository.findByName(roleDTO.getName()) != null) {
             log.error(LogMessages.ROLE_ALREADY_EXISTS + "{}", roleDTO.getName());
             throw new RoleAlreadyExistsException(LogMessages.ROLE_ALREADY_EXISTS_MESSAGE + roleDTO.getName());
         }

@@ -12,8 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +25,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/roles")
 @Slf4j
+@AllArgsConstructor
 @Tag(name = "Role", description = "Role management APIs")
 public class RoleController {
 
-    @Autowired
     private RoleService roleService;
 
     @Operation(summary = "Fetching all roles", tags = { "role", "get" })

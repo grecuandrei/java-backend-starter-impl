@@ -51,8 +51,8 @@ public class SetupLoader implements ApplicationListener<ContextRefreshedEvent> {
         Role adminRole = createRoleIfNotFound(RoleEnum.ADMIN, adminPermissions);
         createRoleIfNotFound(RoleEnum.USER, Collections.singletonList(readPerm));
 
-        Optional<User> userOpt = userRepository.findByUsername("admin");
-        if (userOpt.isEmpty()) {
+        User userDb = userRepository.findByUsername("admin");
+        if (userDb == null) {
             User user = User.builder()
                     .username("admin")
                     .password(passwordEncoder.encode("admin"))
@@ -66,26 +66,26 @@ public class SetupLoader implements ApplicationListener<ContextRefreshedEvent> {
     }
 
     Permission createPrivilegeIfNotFound(String name) {
-        return permissionRepository.findByName(name)
-                .orElseGet(() -> {
-                    Permission permission = Permission.builder()
-                            .name(name)
-                            .build();
-                    permissionRepository.save(permission);
-                    return permission;
-                });
+        Permission permission = permissionRepository.findByName(name);
+        if (permission == null) {
+            permission = Permission.builder()
+                    .name(name)
+                    .build();
+            permissionRepository.save(permission);
+        }
+        return permission;
     }
 
     Role createRoleIfNotFound(RoleEnum name, List<Permission> permissions) {
-        return roleRepository.findByName(name)
-                .orElseGet(() -> {
-                    Role role = Role.builder()
-                            .name(name)
-                            .description("ROLE_" + name)
-                            .permissions(permissions)
-                            .build();
-                    roleRepository.save(role);
-                    return role;
-                });
+        Role role = roleRepository.findByName(name);
+        if (role == null) {
+            role = Role.builder()
+                    .name(name)
+                    .description("ROLE_" + name)
+                    .permissions(permissions)
+                    .build();
+            roleRepository.save(role);
+        }
+        return role;
     }
 }
