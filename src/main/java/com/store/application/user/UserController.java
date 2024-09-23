@@ -93,7 +93,7 @@ public class UserController {
             UserDTO user = userService.updateUser(updatedUser);
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (UserNotFoundException e) {
-            log.error(LogMessages.USER_NOT_FOUND + "{}", updatedUser.getId());
+            log.error(LogMessages.USER_NOT_FOUND_BY_ID + "{}", updatedUser.getId());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (RoleNotFoundException e) {
             log.error(LogMessages.ROLE_NOT_FOUND + "{}", e.getMessage());
@@ -116,7 +116,7 @@ public class UserController {
             userService.deleteUser(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (UserNotFoundException e) {
-            log.error(LogMessages.USER_NOT_FOUND + "{}", id);
+            log.error(LogMessages.USER_NOT_FOUND_BY_ID + "{}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

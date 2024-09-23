@@ -16,7 +16,7 @@ import java.util.Date;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ProductAlreadyExistsException.class)
+    @ExceptionHandler(PermissionNotFoundException.class)
     public ResponseEntity<?> handlePermissionNotFoundException(PermissionNotFoundException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
         log.error(LogMessages.PERMISSION_NOT_FOUND + "{}", ex.getMessage(), ex);
@@ -35,25 +35,25 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ProductAlreadyExistsException.class)
+    @ExceptionHandler(RoleAlreadyExistsException.class)
     public ResponseEntity<?> handleRoleAlreadyExistsException(RoleAlreadyExistsException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(ProductAlreadyExistsException.class)
+    @ExceptionHandler(RoleNotFoundException.class)
     public ResponseEntity<?> handleRoleNotFoundException(RoleNotFoundException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ProductAlreadyExistsException.class)
+    @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<?> handleUserAlreadyExistsException(UserAlreadyExistsException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(ProductAlreadyExistsException.class)
+    @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<?> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);

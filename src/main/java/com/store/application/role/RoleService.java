@@ -49,7 +49,7 @@ public class RoleService implements IRoleService {
                 .map(user -> user.getRoles().stream()
                         .map(roleMapper::toDTO)
                         .collect(Collectors.toList()))
-                .orElseThrow(() -> new UserNotFoundException(LogMessages.USER_NOT_FOUND + userId));
+                .orElseThrow(() -> new UserNotFoundException(LogMessages.USER_NOT_FOUND_BY_ID + userId));
     }
 
     @Transactional

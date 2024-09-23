@@ -56,8 +56,9 @@ public class UserService implements IUserService {
             log.error(String.format(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername()));
             throw new UserAlreadyExistsException(String.format(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername()));
         }
-        userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
         User user = userMapper.toEntity(userDTO);
+        userDTO.setPassword(encodedPassword);
         user.setEnabled(true);
         user.setRoles(userDTO.getRoles().stream()
                 .map(roleId -> roleRepository.findById(roleId)

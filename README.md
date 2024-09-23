@@ -15,6 +15,7 @@ This is a minimal Java Spring backend API for managing a store's products.
 - Pagination and sorting for products and users
 - Spring Cache for products and users
 - Indexing
+- JWT for authentication
 
 ## Setup and Installation
 
@@ -61,7 +62,7 @@ An admin user is created at startup with the following credentials:
 - The Pageable interface from Spring Data JPA is used for this purpose.
 
 ## Authentication and Authorization
-- Basic authentication is implemented.
+- JWT authentication is implemented.
 - Role-based access control with roles such as USER and ADMIN.
 
 ## Error Handling

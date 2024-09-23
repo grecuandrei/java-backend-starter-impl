@@ -73,7 +73,7 @@ public class RoleController {
             List<RoleDTO> roles = roleService.getRolesForUserId(userId);
             return new ResponseEntity<>(roles, HttpStatus.OK);
         } catch (UserNotFoundException e) {
-            log.error(LogMessages.USER_NOT_FOUND + "{}", userId);
+            log.error(LogMessages.USER_NOT_FOUND_BY_ID + "{}", userId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
