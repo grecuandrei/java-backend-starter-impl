@@ -58,7 +58,7 @@ public class UserService implements IUserService {
         }
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
         User user = userMapper.toEntity(userDTO);
-        userDTO.setPassword(encodedPassword);
+        user.setPassword(encodedPassword);
         user.setEnabled(true);
         user.setRoles(userDTO.getRoles().stream()
                 .map(roleId -> roleRepository.findById(roleId)

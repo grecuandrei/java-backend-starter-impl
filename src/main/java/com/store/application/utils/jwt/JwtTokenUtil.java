@@ -6,14 +6,15 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtTokenUtil {
@@ -32,11 +33,28 @@ public class JwtTokenUtil {
         return claimsResolver.apply(claims);
     }
 
+    public List<String> extractRoles(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("roles", List.class);
+    }
+
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        Collection<? extends GrantedAuthority> roles = userDetails.getAuthorities();
+
+        if (roles.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            extraClaims.put("isAdmin", true);
+        } else {
+            extraClaims.put("isAdmin", false);
+        }
+
+        extraClaims.put("roles", roles.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
+
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
