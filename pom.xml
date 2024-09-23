@@ -12,7 +12,7 @@
 	<artifactId>store</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>store</name>
-	<description>Store management project for ING Hub</description>
+	<description>Store management project</description>
 	<url/>
 	<licenses>
 		<license/>
