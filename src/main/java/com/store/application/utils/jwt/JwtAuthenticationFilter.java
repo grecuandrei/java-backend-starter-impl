@@ -43,13 +43,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String jwt = authHeader.substring(7);
-            final String username = jwtTokenUtil.extractUsername(jwt);
+            final String email = jwtTokenUtil.extractEmail(jwt);
             final List<String> roles = jwtTokenUtil.extractRoles(jwt);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            if (username != null && authentication == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            if (email != null && authentication == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
 
                 if (jwtTokenUtil.isTokenValid(jwt, userDetails)) {
                     List<GrantedAuthority> authorities =
@@ -65,6 +65,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    String newToken = jwtTokenUtil.generateToken(userDetails);
+                    response.setHeader("Authorization", "Bearer " + newToken);
                 }
             }
 
@@ -72,7 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (Exception exception) {
             log.error("Error processing JWT token: {}", exception.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            response.getWriter().write(exception.getMessage());
         }
     }
 }

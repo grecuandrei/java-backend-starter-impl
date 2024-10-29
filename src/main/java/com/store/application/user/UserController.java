@@ -3,7 +3,9 @@ package com.store.application.user;
 import com.store.application.exceptions.RoleNotFoundException;
 import com.store.application.exceptions.UserAlreadyExistsException;
 import com.store.application.exceptions.UserNotFoundException;
+import com.store.application.utils.CustomResponse;
 import com.store.application.utils.LogMessages;
+import com.store.application.utils.filters.PageFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,14 +13,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,10 +41,24 @@ public class UserController {
             )
     })
     @GetMapping
-    public ResponseEntity<Page<UserDTO>> getAllUsers(@RequestParam("page") int pageIndex,
-                                                     @RequestParam("size") int pageSize) {
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
         log.info(LogMessages.FETCHING_ALL_USERS + "{}");
-        Page<UserDTO> users = userService.getAllUsers(PageRequest.of(pageIndex, pageSize));
+        List<UserDTO> users = userService.getAllUsers();
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Fetching all users filtered & paginated", tags = { "users", "post" })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Successfully fetched all users filtered & paginated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}
+            )
+    })
+    @GetMapping
+    public ResponseEntity<CustomResponse<UserDTO>> getAllUsersFilteredAndPaginated(
+            @Parameter(description = "Filter & Pageable query", required = true) @Valid @RequestBody PageFilter pageFilter) {
+        log.info(LogMessages.FETCHING_ALL_USERS + "{}");
+        CustomResponse<UserDTO> users = userService.getAllUsersFilteredAndPaginated(pageFilter);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 

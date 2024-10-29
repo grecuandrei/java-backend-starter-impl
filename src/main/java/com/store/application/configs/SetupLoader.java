@@ -51,12 +51,13 @@ public class SetupLoader implements ApplicationListener<ContextRefreshedEvent> {
         Role adminRole = createRoleIfNotFound(RoleEnum.ADMIN, adminPermissions);
         createRoleIfNotFound(RoleEnum.USER, Collections.singletonList(readPerm));
 
-        User userDb = userRepository.findByUsername("admin");
+        User userDb = userRepository.findByEmail("admin@admin.com");
         if (userDb == null) {
             User user = User.builder()
                     .username("admin")
+                    .email("admin@admin.com")
                     .password(passwordEncoder.encode("admin"))
-                    .roles(Collections.singletonList(adminRole))
+                    .roles(Set.of(adminRole))
                     .enabled(true)
                     .build();
             userRepository.save(user);

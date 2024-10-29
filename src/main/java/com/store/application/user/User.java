@@ -9,9 +9,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
-import java.util.UUID;
+import java.time.OffsetDateTime;
+import java.util.*;
 
 @Entity
 @Table(name = "users", indexes = {
@@ -36,16 +35,19 @@ public class User implements Serializable {
     @Column(nullable = false)
     private String username;
 
+    @Column(unique = true, nullable = false)
+    private String email;
+
     @Column(nullable = false)
     private String password;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
-    private Date createdAt;
+    private OffsetDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private Date updatedAt;
+    private OffsetDateTime updatedAt;
 
     @Column(name = "enabled")
     private boolean enabled = true;
@@ -58,5 +60,5 @@ public class User implements Serializable {
             inverseJoinColumns = @JoinColumn(
                     name = "role_id", referencedColumnName = "id"))
     @JsonIdentityReference(alwaysAsId = true)
-    private Collection<Role> roles;
+    private Set<Role> roles = new HashSet<>();
 }

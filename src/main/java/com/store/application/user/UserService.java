@@ -5,20 +5,23 @@ import com.store.application.exceptions.UserAlreadyExistsException;
 import com.store.application.exceptions.UserNotFoundException;
 import com.store.application.role.Role;
 import com.store.application.role.RoleRepository;
+import com.store.application.utils.CustomResponse;
 import com.store.application.utils.LogMessages;
+import com.store.application.utils.filters.ObjectSpecification;
+import com.store.application.utils.filters.PageFilter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,9 +39,28 @@ public class UserService implements IUserService {
     private UserMapper userMapper;
 
     @Cacheable(cacheNames = "users", unless = "#result == null")
-    public Page<UserDTO> getAllUsers(Pageable pageable) {
+    public List<UserDTO> getAllUsers() {
         log.info(LogMessages.FETCHING_ALL_USERS);
-        return userRepository.findAll(pageable).map(userMapper::toDTO);
+        return userRepository.findAll().stream().map(userMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Cacheable(cacheNames = "users", unless = "#result == null")
+    public CustomResponse<UserDTO> getAllUsersFilteredAndPaginated(PageFilter pageFilter) {
+        log.info(LogMessages.FETCHING_ALL_USERS);
+        ObjectSpecification<User> specification = new ObjectSpecification<>(pageFilter.getFilters());
+        Pageable pageable = PageRequest.of(pageFilter.getPage(), pageFilter.getSize(), Sort.Direction.fromString(pageFilter.getOrder()), pageFilter.getSort());
+        Page<UserDTO> usersPage = userRepository.findAll(specification, pageable).map(userMapper::toDTO);
+
+        List<UserDTO> userDTOList = usersPage.getContent();
+
+        return CustomResponse.<UserDTO>builder()
+                .content(userDTOList)
+                .page(usersPage.getNumber() + 1)
+                .size(usersPage.getSize())
+                .total(usersPage.getTotalElements())
+                .totalPages(usersPage.getTotalPages())
+                .last(usersPage.isLast())
+                .build();
     }
 
     @Cacheable(cacheNames = "users", key = "#id", unless = "#result == null")
@@ -52,8 +74,8 @@ public class UserService implements IUserService {
     @CacheEvict(cacheNames = "users", allEntries = true)
     public UserDTO createUser(UserDTO userDTO) {
         log.info(LogMessages.CREATING_NEW_USER + "{}", userDTO);
-        if (userRepository.findByUsername(userDTO.getUsername()) != null) {
-            log.error(String.format(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername()));
+        if (userRepository.findByEmail(userDTO.getEmail()) != null) {
+            log.error(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername());
             throw new UserAlreadyExistsException(String.format(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername()));
         }
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
@@ -63,7 +85,7 @@ public class UserService implements IUserService {
         user.setRoles(userDTO.getRoles().stream()
                 .map(roleId -> roleRepository.findById(roleId)
                         .orElseThrow(() -> new RoleNotFoundException(LogMessages.ROLE_NOT_FOUND + roleId)))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toSet()));
         return userMapper.toDTO(userRepository.save(user));
     }
 
@@ -72,17 +94,17 @@ public class UserService implements IUserService {
     public UserDTO updateUser(UserDTO updatedUserDTO) {
         log.info(LogMessages.UPDATING_USER + "{}", updatedUserDTO.getId());
         return userRepository.findById(updatedUserDTO.getId()).map(user -> {
-            User userWithSameUsername = userRepository.findByUsername(updatedUserDTO.getUsername());
+            User userWithSameUsername = userRepository.findByEmail(updatedUserDTO.getUsername());
             if (userWithSameUsername != null && !userWithSameUsername.getId().equals(updatedUserDTO.getId())) {
-                log.error(String.format(LogMessages.USERNAME_ALREADY_EXISTS, updatedUserDTO.getUsername()));
+                log.error(LogMessages.USERNAME_ALREADY_EXISTS, updatedUserDTO.getUsername());
                 throw new UserAlreadyExistsException(String.format(LogMessages.USERNAME_ALREADY_EXISTS, updatedUserDTO.getUsername()));
             }
 
             user.setUsername(updatedUserDTO.getUsername());
             user.setPassword(passwordEncoder.encode(updatedUserDTO.getPassword()));
-            Collection<Role> roles = updatedUserDTO.getRoles().stream()
+            Set<Role> roles = updatedUserDTO.getRoles().stream()
                     .map(roleId -> roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(LogMessages.ROLE_NOT_FOUND + roleId)))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
             user.setRoles(roles);
             log.info(LogMessages.UPDATED_USER + "{}", user);
             return userMapper.toDTO(userRepository.save(user));

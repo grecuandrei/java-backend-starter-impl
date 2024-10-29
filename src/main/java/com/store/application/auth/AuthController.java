@@ -20,7 +20,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RequestMapping("/auth")
 @RestController
@@ -31,6 +34,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
     private final UserService userService;
+    private final UserDetailsService userDetailsService;
 
     // Login endpoint
     @Operation(summary = "Login user", tags = { "auth", "post" })
@@ -92,6 +96,41 @@ public class AuthController {
         } catch (RoleNotFoundException e) {
             log.error("Role not found: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Role not found");
+        }
+    }
+
+    @Operation(summary = "Refresh JWT token", tags = { "auth", "post" })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Successfully refreshed token",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponse.class))}
+            ),
+            @ApiResponse(responseCode = "401", description = "Unauthorized refresh")
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header missing or invalid");
+        }
+        try {
+            assert authHeader != null;
+            final String jwt = authHeader.substring(7);
+            final String email = jwtTokenUtil.extractEmail(jwt);
+
+            if (email != null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+                if (jwtTokenUtil.isTokenValid(jwt, userDetails)) {
+                    String newToken = jwtTokenUtil.refreshToken(jwt);
+                    return ResponseEntity.ok(new AuthResponse(newToken));
+                }
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
+        } catch (Exception e) {
+            log.error("Error refreshing token: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
         }
     }
 }

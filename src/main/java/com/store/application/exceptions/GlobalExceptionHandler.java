@@ -1,6 +1,5 @@
 package com.store.application.exceptions;
 
-import com.store.application.utils.LogMessages;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PermissionNotFoundException.class)
     public ResponseEntity<?> handlePermissionNotFoundException(PermissionNotFoundException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
-        log.error(LogMessages.PERMISSION_NOT_FOUND + "{}", ex.getMessage(), ex);
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 

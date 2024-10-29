@@ -1,8 +1,8 @@
 package com.store.application.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.store.application.role.RoleDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -26,6 +26,9 @@ public class UserDTO implements Serializable {
     private UUID id;
     @NotBlank(message = "Must set a username")
     private String username;
+    @NotBlank(message = "Must set a email")
+    @Email(message = "Email should be valid")
+    private String email;
     @NotBlank(message = "Must set a password")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;

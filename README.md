@@ -12,7 +12,8 @@ This is a minimal Java Spring backend API for managing a store's products.
 - JUnit and Mockito for testing
 - Spring Boot Actuator for health checks and monitoring
 - SpringDoc OpenAPI for API documentation
-- Pagination and sorting for products and users
+- Pagination and sorting for products
+- Pagination, sorting & filters for users
 - Spring Cache for products and users
 - Indexing
 - JWT for authentication
@@ -40,7 +41,7 @@ This is a minimal Java Spring backend API for managing a store's products.
 
 ### Default Admin User
 An admin user is created at startup with the following credentials:
-- Username: `admin`
+- Email: `admin@admin.com`
 - Password: `admin`
 
 ## API Endpoints Examples
@@ -61,6 +62,10 @@ An admin user is created at startup with the following credentials:
 - Pagination and sorting are implemented for fetching products and users.
 - The Pageable interface from Spring Data JPA is used for this purpose.
 
+## Filtering
+- Custom filtration is implemented with the help of Specification class 
+- Custom Response and Query Classes
+
 ## Authentication and Authorization
 - JWT authentication is implemented.
 - Role-based access control with roles such as USER and ADMIN.
@@ -79,7 +84,7 @@ An admin user is created at startup with the following credentials:
 ## API Documentation
 - Swagger UI is available at: `http://localhost:8080/swagger-ui.html`
 
-## Postman Collection
+## Postman Collection - TODO Update
 A Postman collection for testing the API endpoints is available in the root directory: `postman/Store Management API.postman_collection.json`
 
 ## Testing

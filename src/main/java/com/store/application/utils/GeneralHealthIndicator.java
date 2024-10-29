@@ -1,6 +1,6 @@
 package com.store.application.utils;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -8,11 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
+@AllArgsConstructor
 public class GeneralHealthIndicator implements HealthIndicator {
-    @Autowired
     private RestTemplate restTemplate;
-
-    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Override

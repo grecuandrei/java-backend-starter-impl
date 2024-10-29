@@ -10,7 +10,7 @@ public class LogMessages {
     public static final String UPDATING_USER = "Updating user with id: ";
     public static final String UPDATED_USER = "Updated user: ";
     public static final String DELETING_USER = "Deleting user with id: ";
-    public static final String USER_NOT_FOUND_BY_USERNAME = "User not found with username: ";
+    public static final String USER_NOT_FOUND_BY_EMAIL = "User not found with email: ";
     public static final String ERROR_CREATING_USER = "Error creating user: ";
 
 //    ROLE
