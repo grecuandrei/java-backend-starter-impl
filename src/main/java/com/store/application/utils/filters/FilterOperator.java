@@ -1,0 +1,10 @@
+package com.store.application.utils.filters;
+
+public enum FilterOperator {
+    EQUALS, NOT_EQUALS,
+    GREATER_THAN, GREATER_THAN_OR_EQUALS, LESS_THAN, LESS_THAN_OR_EQUALS,
+    IN, NOT_IN, LIKE, NOT_LIKE,
+    IS_NULL, IS_NOT_NULL,
+    STARTS_WITH, ENDS_WITH, CONTAINS, CONTAINS_IGNORE_CASE,
+    BETWEEN, NOT_BETWEEN
+}
