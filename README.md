@@ -1,4 +1,4 @@
-# Store Management API
+# Java Backend Starter API
 
 ## Project Description
 This is a minimal Java Spring backend API for managing a store's products.
