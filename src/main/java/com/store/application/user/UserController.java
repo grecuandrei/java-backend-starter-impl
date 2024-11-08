@@ -55,7 +55,7 @@ public class UserController {
             )
     })
     @PreAuthorize("isAuthenticated()")
-    @GetMapping
+    @PostMapping("/get-filtered")
     public ResponseEntity<CustomResponse<UserDTO>> getAllUsersFilteredAndPaginated(
             @Parameter(description = "Filter & Pageable query", required = true) @Valid @RequestBody PageFilter pageFilter) {
         CustomResponse<UserDTO> users = userService.getAllUsersFilteredAndPaginated(pageFilter);
