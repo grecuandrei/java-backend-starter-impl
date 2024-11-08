@@ -4,7 +4,6 @@ import com.store.application.exceptions.RoleNotFoundException;
 import com.store.application.exceptions.UserAlreadyExistsException;
 import com.store.application.exceptions.UserNotFoundException;
 import com.store.application.utils.CustomResponse;
-import com.store.application.utils.LogMessages;
 import com.store.application.utils.filters.PageFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,9 +40,9 @@ public class UserController {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}
             )
     })
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
-        log.info(LogMessages.FETCHING_ALL_USERS + "{}");
         List<UserDTO> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -54,10 +54,10 @@ public class UserController {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}
             )
     })
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<CustomResponse<UserDTO>> getAllUsersFilteredAndPaginated(
             @Parameter(description = "Filter & Pageable query", required = true) @Valid @RequestBody PageFilter pageFilter) {
-        log.info(LogMessages.FETCHING_ALL_USERS + "{}");
         CustomResponse<UserDTO> users = userService.getAllUsersFilteredAndPaginated(pageFilter);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -67,9 +67,9 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Successfully fetched user"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@Parameter(description = "User id to get data for", required = true) @PathVariable UUID id) {
-        log.info(LogMessages.FETCHING_USER_BY_ID + "{}", id);
         Optional<UserDTO> user = userService.getUserById(id);
         return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -81,17 +81,15 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "User already exists"),
             @ApiResponse(responseCode = "400", description = "Error creating user")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@Parameter(description = "User data to create", required = true) @RequestBody UserDTO user) {
-        log.info(LogMessages.CREATING_NEW_USER + "{}", user);
         try {
             UserDTO createdUser = userService.createUser(user);
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
         } catch (UserAlreadyExistsException e) {
-            log.error(LogMessages.ERROR_CREATING_USER + "{}", e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         } catch (RoleNotFoundException e) {
-            log.error(LogMessages.ROLE_NOT_FOUND + "{}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -102,20 +100,17 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "User already exists"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<UserDTO> updateUser(@Parameter(description = "User with updated data", required = true) @RequestBody UserDTO updatedUser) {
-        log.info(LogMessages.UPDATING_USER + "{}", updatedUser.getId());
         try {
             UserDTO user = userService.updateUser(updatedUser);
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (UserNotFoundException e) {
-            log.error(LogMessages.USER_NOT_FOUND_BY_ID + "{}", updatedUser.getId());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (RoleNotFoundException e) {
-            log.error(LogMessages.ROLE_NOT_FOUND + "{}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (UserAlreadyExistsException e) {
-            log.error(LogMessages.USERNAME_ALREADY_EXISTS + "{}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -125,14 +120,13 @@ public class UserController {
             @ApiResponse(responseCode = "204", description = "Successfully deleted user"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@Parameter(description = "User id to delete data for", required = true) @PathVariable UUID id) {
-        log.info(LogMessages.DELETING_USER + "{}", id);
         try {
             userService.deleteUser(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (UserNotFoundException e) {
-            log.error(LogMessages.USER_NOT_FOUND_BY_ID + "{}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

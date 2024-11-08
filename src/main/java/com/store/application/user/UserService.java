@@ -40,13 +40,11 @@ public class UserService implements IUserService {
 
     @Cacheable(cacheNames = "users", unless = "#result == null")
     public List<UserDTO> getAllUsers() {
-        log.info(LogMessages.FETCHING_ALL_USERS);
         return userRepository.findAll().stream().map(userMapper::toDTO).collect(Collectors.toList());
     }
 
     @Cacheable(cacheNames = "users", unless = "#result == null")
     public CustomResponse<UserDTO> getAllUsersFilteredAndPaginated(PageFilter pageFilter) {
-        log.info(LogMessages.FETCHING_ALL_USERS);
         ObjectSpecification<User> specification = new ObjectSpecification<>(pageFilter.getFilters());
         Pageable pageable = PageRequest.of(pageFilter.getPage(), pageFilter.getSize(), Sort.Direction.fromString(pageFilter.getOrder()), pageFilter.getSort());
         Page<UserDTO> usersPage = userRepository.findAll(specification, pageable).map(userMapper::toDTO);
@@ -65,7 +63,6 @@ public class UserService implements IUserService {
 
     @Cacheable(cacheNames = "users", key = "#id", unless = "#result == null")
     public Optional<UserDTO> getUserById(UUID id) {
-        log.info(LogMessages.FETCHING_USER_BY_ID + "{}", id);
         return userRepository.findById(id)
                 .map(userMapper::toDTO);
     }
@@ -73,9 +70,7 @@ public class UserService implements IUserService {
     @Transactional
     @CacheEvict(cacheNames = "users", allEntries = true)
     public UserDTO createUser(UserDTO userDTO) {
-        log.info(LogMessages.CREATING_NEW_USER + "{}", userDTO);
         if (userRepository.findByEmail(userDTO.getEmail()) != null) {
-            log.error(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername());
             throw new UserAlreadyExistsException(String.format(LogMessages.USERNAME_ALREADY_EXISTS, userDTO.getUsername()));
         }
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
@@ -92,11 +87,9 @@ public class UserService implements IUserService {
     @Transactional
     @CacheEvict(cacheNames = "users", allEntries = true)
     public UserDTO updateUser(UserDTO updatedUserDTO) {
-        log.info(LogMessages.UPDATING_USER + "{}", updatedUserDTO.getId());
         return userRepository.findById(updatedUserDTO.getId()).map(user -> {
             User userWithSameUsername = userRepository.findByEmail(updatedUserDTO.getUsername());
             if (userWithSameUsername != null && !userWithSameUsername.getId().equals(updatedUserDTO.getId())) {
-                log.error(LogMessages.USERNAME_ALREADY_EXISTS, updatedUserDTO.getUsername());
                 throw new UserAlreadyExistsException(String.format(LogMessages.USERNAME_ALREADY_EXISTS, updatedUserDTO.getUsername()));
             }
 
@@ -106,18 +99,13 @@ public class UserService implements IUserService {
                     .map(roleId -> roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(LogMessages.ROLE_NOT_FOUND + roleId)))
                     .collect(Collectors.toSet());
             user.setRoles(roles);
-            log.info(LogMessages.UPDATED_USER + "{}", user);
             return userMapper.toDTO(userRepository.save(user));
-        }).orElseThrow(() -> {
-            log.error(LogMessages.USER_NOT_FOUND_BY_ID + "{}", updatedUserDTO.getId());
-            return new UserNotFoundException(LogMessages.USER_NOT_FOUND_BY_ID + updatedUserDTO.getId());
-        });
+        }).orElseThrow(() -> new UserNotFoundException(LogMessages.USER_NOT_FOUND_BY_ID + updatedUserDTO.getId()));
     }
 
     @Transactional
     @CacheEvict(cacheNames = "users", allEntries = true)
     public void deleteUser(UUID id) {
-        log.info(LogMessages.DELETING_USER + "{}", id);
         if (!userRepository.existsById(id)) {
             log.error(LogMessages.USER_NOT_FOUND_BY_ID + "{}", id);
             throw new UserNotFoundException(LogMessages.USER_NOT_FOUND_BY_ID + id);

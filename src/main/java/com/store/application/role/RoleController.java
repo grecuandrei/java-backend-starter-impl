@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,9 +39,9 @@ public class RoleController {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RoleDTO.class))}
             )
     })
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
-        log.info(LogMessages.FETCH_ALL_ROLES + "{}");
         List<RoleDTO> roles = roleService.getAllRoles();
         return new ResponseEntity<>(roles, HttpStatus.OK);
     }
@@ -50,9 +51,9 @@ public class RoleController {
             @ApiResponse(responseCode = "200", description = "Fetched role successfully"),
             @ApiResponse(responseCode = "404", description = "Role not found")
     })
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<RoleDTO> getRoleById(@Parameter(description = "Role id to get data for", required = true) @PathVariable UUID id) {
-        log.info(LogMessages.FETCH_ROLE_BY_ID + "{}", id);
         Optional<RoleDTO> role = roleService.getRoleById(id);
         return role.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> {
@@ -66,14 +67,13 @@ public class RoleController {
             @ApiResponse(responseCode = "200", description = "Fetched roles for user successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<RoleDTO>> getRolesForUserId(@Parameter(description = "User id to get roles for", required = true) @PathVariable UUID userId) {
-        log.info(LogMessages.FETCH_ROLES_FOR_USER_ID + "{}", userId);
         try {
             List<RoleDTO> roles = roleService.getRolesForUserId(userId);
             return new ResponseEntity<>(roles, HttpStatus.OK);
         } catch (UserNotFoundException e) {
-            log.error(LogMessages.USER_NOT_FOUND_BY_ID + "{}", userId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -84,17 +84,15 @@ public class RoleController {
             @ApiResponse(responseCode = "409", description = "Role already exists"),
             @ApiResponse(responseCode = "400", description = "Error creating role")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<RoleDTO> createRole(@Parameter(description = "Role data to create", required = true) @RequestBody RoleDTO roleDTO) {
-        log.info(LogMessages.CREATE_NEW_ROLE + "{}", roleDTO.getName());
         try {
             RoleDTO createdRole = roleService.createRole(roleDTO);
             return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
         } catch (RoleAlreadyExistsException e) {
-            log.error(LogMessages.ROLE_ALREADY_EXISTS + "{}", e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         } catch (PermissionNotFoundException e) {
-            log.error(LogMessages.PERMISSION_NOT_FOUND + "{}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -104,14 +102,13 @@ public class RoleController {
             @ApiResponse(responseCode = "200", description = "Updated role successfully"),
             @ApiResponse(responseCode = "404", description = "Role not found")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<RoleDTO> updateRole(@Parameter(description = "Role with updated data", required = true) @RequestBody RoleDTO updatedRoleDTO) {
-        log.info(LogMessages.UPDATE_ROLE + "{}", updatedRoleDTO.getId());
         try {
             RoleDTO role = roleService.updateRole(updatedRoleDTO);
             return new ResponseEntity<>(role, HttpStatus.OK);
         } catch (RoleNotFoundException e) {
-            log.error(LogMessages.ROLE_NOT_FOUND + "{}", updatedRoleDTO.getId());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -121,14 +118,13 @@ public class RoleController {
             @ApiResponse(responseCode = "204", description = "Deleted role successfully"),
             @ApiResponse(responseCode = "404", description = "Role not found")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRole(@Parameter(description = "Role id to delete data for", required = true) @PathVariable UUID id) {
-        log.info(LogMessages.DELETE_ROLE + "{}", id);
         try {
             roleService.deleteRole(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RoleNotFoundException e) {
-            log.error(LogMessages.ROLE_NOT_FOUND + "{}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

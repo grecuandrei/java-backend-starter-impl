@@ -31,20 +31,17 @@ public class RoleService implements IRoleService {
     private RoleMapper roleMapper;
 
     public List<RoleDTO> getAllRoles() {
-        log.info(LogMessages.FETCH_ALL_ROLES + "{}");
         return roleRepository.findAll().stream()
                 .map(roleMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<RoleDTO> getRoleById(UUID id) {
-        log.info(LogMessages.FETCH_ROLE_BY_ID + "{}", id);
         return roleRepository.findById(id)
                 .map(roleMapper::toDTO);
     }
 
     public List<RoleDTO> getRolesForUserId(UUID userId) {
-        log.info(LogMessages.FETCH_ROLES_FOR_USER_ID + "{}", userId);
         return userRepository.findById(userId)
                 .map(user -> user.getRoles().stream()
                         .map(roleMapper::toDTO)
@@ -54,9 +51,7 @@ public class RoleService implements IRoleService {
 
     @Transactional
     public RoleDTO createRole(RoleDTO roleDTO) {
-        log.info(LogMessages.CREATE_NEW_ROLE + "{}", roleDTO.getName());
         if (roleRepository.findByName(roleDTO.getName()) != null) {
-            log.error(LogMessages.ROLE_ALREADY_EXISTS + "{}", roleDTO.getName());
             throw new RoleAlreadyExistsException(LogMessages.ROLE_ALREADY_EXISTS_MESSAGE + roleDTO.getName());
         }
         Role role = roleMapper.toEntity(roleDTO);
@@ -69,7 +64,6 @@ public class RoleService implements IRoleService {
 
     @Transactional
     public RoleDTO updateRole(RoleDTO updatedRoleDTO) {
-        log.info(LogMessages.UPDATE_ROLE + "{}", updatedRoleDTO.getId());
         return roleRepository.findById(updatedRoleDTO.getId()).map(role -> {
             role.setName(updatedRoleDTO.getName());
             role.setDescription(updatedRoleDTO.getDescription());
@@ -81,19 +75,13 @@ public class RoleService implements IRoleService {
                     .collect(Collectors.toSet());
             role.setPermissions(permissions);
 
-            log.info(LogMessages.UPDATED_ROLE + "{}", role);
             return roleMapper.toDTO(roleRepository.save(role));
-        }).orElseThrow(() -> {
-            log.error(LogMessages.ROLE_NOT_FOUND + "{}", updatedRoleDTO.getId());
-            return new RoleNotFoundException(LogMessages.ROLE_NOT_FOUND_MESSAGE + updatedRoleDTO.getId());
-        });
+        }).orElseThrow(() -> new RoleNotFoundException(LogMessages.ROLE_NOT_FOUND_MESSAGE + updatedRoleDTO.getId()));
     }
 
     @Transactional
     public void deleteRole(UUID id) {
-        log.info(LogMessages.DELETE_ROLE + "{}", id);
         if (!roleRepository.existsById(id)) {
-            log.error(LogMessages.ROLE_NOT_FOUND + "{}", id);
             throw new RoleNotFoundException(LogMessages.ROLE_NOT_FOUND_MESSAGE + id);
         }
         roleRepository.deleteById(id);
