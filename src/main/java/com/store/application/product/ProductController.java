@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -61,7 +62,7 @@ public class ProductController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<ProductDTO> createProduct(@Parameter(description = "Product data to create", required = true) @RequestBody ProductDTO productDTO) {
+    public ResponseEntity<ProductDTO> createProduct(@Parameter(description = "Product data to create", required = true) @Valid @RequestBody ProductDTO productDTO) {
         try {
             ProductDTO createdProduct = productService.createProduct(productDTO);
             return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
@@ -80,7 +81,7 @@ public class ProductController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
-    public ResponseEntity<ProductDTO> updateProduct(@Parameter(description = "Product with updated data", required = true) @RequestBody ProductDTO updatedProductDTO) {
+    public ResponseEntity<ProductDTO> updateProduct(@Parameter(description = "Product with updated data", required = true) @Valid @RequestBody ProductDTO updatedProductDTO) {
         try {
             ProductDTO product = productService.updateProduct(updatedProductDTO);
             return new ResponseEntity<>(product, HttpStatus.OK);

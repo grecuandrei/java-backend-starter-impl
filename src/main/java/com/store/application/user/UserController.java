@@ -83,7 +83,7 @@ public class UserController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@Parameter(description = "User data to create", required = true) @RequestBody UserDTO user) {
+    public ResponseEntity<UserDTO> createUser(@Parameter(description = "User data to create", required = true) @Valid @RequestBody UserDTO user) {
         try {
             UserDTO createdUser = userService.createUser(user);
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
@@ -102,7 +102,7 @@ public class UserController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
-    public ResponseEntity<UserDTO> updateUser(@Parameter(description = "User with updated data", required = true) @RequestBody UserDTO updatedUser) {
+    public ResponseEntity<UserDTO> updateUser(@Parameter(description = "User with updated data", required = true) @Valid @RequestBody UserDTO updatedUser) {
         try {
             UserDTO user = userService.updateUser(updatedUser);
             return new ResponseEntity<>(user, HttpStatus.OK);

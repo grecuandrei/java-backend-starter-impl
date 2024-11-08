@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -55,7 +56,7 @@ public class PermissionController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<PermissionDTO> createPermission(@Parameter(description = "Permission data to create", required = true) @RequestBody PermissionDTO permissionDTO) {
+    public ResponseEntity<PermissionDTO> createPermission(@Parameter(description = "Permission data to create", required = true) @Valid @RequestBody PermissionDTO permissionDTO) {
         PermissionDTO createdPermission = permissionService.createPermission(permissionDTO);
         return new ResponseEntity<>(createdPermission, HttpStatus.CREATED);
     }
@@ -67,7 +68,7 @@ public class PermissionController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
-    public ResponseEntity<PermissionDTO> updatePermission(@Parameter(description = "Permission with updated data", required = true) @RequestBody PermissionDTO updatedPermissionDTO) {
+    public ResponseEntity<PermissionDTO> updatePermission(@Parameter(description = "Permission with updated data", required = true) @Valid @RequestBody PermissionDTO updatedPermissionDTO) {
         PermissionDTO permission = permissionService.updatePermission(updatedPermissionDTO);
         return new ResponseEntity<>(permission, HttpStatus.OK);
     }

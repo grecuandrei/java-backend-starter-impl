@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -86,7 +87,7 @@ public class RoleController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<RoleDTO> createRole(@Parameter(description = "Role data to create", required = true) @RequestBody RoleDTO roleDTO) {
+    public ResponseEntity<RoleDTO> createRole(@Parameter(description = "Role data to create", required = true) @Valid @RequestBody RoleDTO roleDTO) {
         try {
             RoleDTO createdRole = roleService.createRole(roleDTO);
             return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
@@ -104,7 +105,7 @@ public class RoleController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
-    public ResponseEntity<RoleDTO> updateRole(@Parameter(description = "Role with updated data", required = true) @RequestBody RoleDTO updatedRoleDTO) {
+    public ResponseEntity<RoleDTO> updateRole(@Parameter(description = "Role with updated data", required = true) @Valid @RequestBody RoleDTO updatedRoleDTO) {
         try {
             RoleDTO role = roleService.updateRole(updatedRoleDTO);
             return new ResponseEntity<>(role, HttpStatus.OK);
