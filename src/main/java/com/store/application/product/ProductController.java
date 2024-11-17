@@ -33,7 +33,7 @@ public class ProductController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched all products")
     })
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @GetMapping
     public ResponseEntity<Page<ProductDTO>> getAllProducts(@RequestParam("page") int pageIndex,
                                                            @RequestParam("size") int pageSize) {
@@ -46,7 +46,7 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Successfully fetched product"),
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProductById(@Parameter(description = "Product id to get data for", required = true) @PathVariable UUID id) {
         Optional<ProductDTO> product = productService.getProductById(id);
@@ -60,7 +60,7 @@ public class ProductController {
             @ApiResponse(responseCode = "409", description = "Product already exists"),
             @ApiResponse(responseCode = "400", description = "Error creating product")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(@Parameter(description = "Product data to create", required = true) @Valid @RequestBody ProductDTO productDTO) {
         try {
@@ -79,7 +79,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product not found"),
             @ApiResponse(responseCode = "409", description = "Product with the same name already exists")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @PutMapping
     public ResponseEntity<ProductDTO> updateProduct(@Parameter(description = "Product with updated data", required = true) @Valid @RequestBody ProductDTO updatedProductDTO) {
         try {
@@ -97,7 +97,7 @@ public class ProductController {
             @ApiResponse(responseCode = "204", description = "Successfully deleted product"),
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@Parameter(description = "Product id to delete data for", required = true) @PathVariable UUID id) {
         try {
@@ -112,7 +112,7 @@ public class ProductController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched products by category")
     })
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @GetMapping("/category/{category}")
     public ResponseEntity<List<ProductDTO>> getProductsByCategory(@Parameter(description = "Get products by category", required = true) @PathVariable Category category) {
         List<ProductDTO> products = productService.getProductsByCategory(category);
@@ -124,7 +124,7 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Successfully changed product price"),
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @PatchMapping("/{id}/changePrice")
     public ResponseEntity<ProductDTO> changePrice(
             @Parameter(description = "Product id to change the price to", required = true) @PathVariable UUID id,
@@ -142,7 +142,7 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Successfully changed product quantity"),
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @PatchMapping("/{id}/increaseQuantity")
     public ResponseEntity<ProductDTO> increaseQuantity(
             @Parameter(description = "Product id to change the quantity to", required = true) @PathVariable UUID id,
@@ -159,7 +159,7 @@ public class ProductController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched categories")
     })
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @GetMapping("/categories")
     public ResponseEntity<List<String>> getCategories() {
         List<String> categories = productService.getCategories();

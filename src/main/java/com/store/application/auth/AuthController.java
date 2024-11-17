@@ -50,7 +50,7 @@ public class AuthController {
         try {
             // Authenticate the user
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
             );
 
             // Generate JWT token

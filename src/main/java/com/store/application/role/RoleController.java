@@ -40,7 +40,7 @@ public class RoleController {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RoleDTO.class))}
             )
     })
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @GetMapping
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
         List<RoleDTO> roles = roleService.getAllRoles();
@@ -52,7 +52,7 @@ public class RoleController {
             @ApiResponse(responseCode = "200", description = "Fetched role successfully"),
             @ApiResponse(responseCode = "404", description = "Role not found")
     })
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @GetMapping("/{id}")
     public ResponseEntity<RoleDTO> getRoleById(@Parameter(description = "Role id to get data for", required = true) @PathVariable UUID id) {
         Optional<RoleDTO> role = roleService.getRoleById(id);
@@ -68,7 +68,7 @@ public class RoleController {
             @ApiResponse(responseCode = "200", description = "Fetched roles for user successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<RoleDTO>> getRolesForUserId(@Parameter(description = "User id to get roles for", required = true) @PathVariable UUID userId) {
         try {
@@ -85,7 +85,7 @@ public class RoleController {
             @ApiResponse(responseCode = "409", description = "Role already exists"),
             @ApiResponse(responseCode = "400", description = "Error creating role")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @PostMapping
     public ResponseEntity<RoleDTO> createRole(@Parameter(description = "Role data to create", required = true) @Valid @RequestBody RoleDTO roleDTO) {
         try {
@@ -103,7 +103,7 @@ public class RoleController {
             @ApiResponse(responseCode = "200", description = "Updated role successfully"),
             @ApiResponse(responseCode = "404", description = "Role not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @PutMapping
     public ResponseEntity<RoleDTO> updateRole(@Parameter(description = "Role with updated data", required = true) @Valid @RequestBody RoleDTO updatedRoleDTO) {
         try {
@@ -119,7 +119,7 @@ public class RoleController {
             @ApiResponse(responseCode = "204", description = "Deleted role successfully"),
             @ApiResponse(responseCode = "404", description = "Role not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRole(@Parameter(description = "Role id to delete data for", required = true) @PathVariable UUID id) {
         try {

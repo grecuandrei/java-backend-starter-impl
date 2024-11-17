@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,8 +89,9 @@ public class UserService implements IUserService {
     @CacheEvict(cacheNames = "users", allEntries = true)
     public UserDTO updateUser(UserDTO updatedUserDTO) {
         return userRepository.findById(updatedUserDTO.getId()).map(user -> {
-            User userWithSameUsername = userRepository.findByEmail(updatedUserDTO.getUsername());
-            if (userWithSameUsername != null && !userWithSameUsername.getId().equals(updatedUserDTO.getId())) {
+            User userWithSameUsername = userRepository.findByEmail(updatedUserDTO.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException(LogMessages.USER_NOT_FOUND_BY_EMAIL + updatedUserDTO.getUsername()));
+            if (!userWithSameUsername.getId().equals(updatedUserDTO.getId())) {
                 throw new UserAlreadyExistsException(String.format(LogMessages.USERNAME_ALREADY_EXISTS, updatedUserDTO.getUsername()));
             }
 

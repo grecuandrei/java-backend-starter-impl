@@ -7,10 +7,12 @@ import com.store.application.role.RoleEnum;
 import com.store.application.role.RoleRepository;
 import com.store.application.user.User;
 import com.store.application.user.UserRepository;
+import com.store.application.utils.LogMessages;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,8 +53,8 @@ public class SetupLoader implements ApplicationListener<ContextRefreshedEvent> {
         Role adminRole = createRoleIfNotFound(RoleEnum.ADMIN, adminPermissions);
         createRoleIfNotFound(RoleEnum.USER, Collections.singletonList(readPerm));
 
-        User userDb = userRepository.findByEmail("admin@admin.com");
-        if (userDb == null) {
+        Optional<User> userDb = userRepository.findByEmail("admin@admin.com");
+        if (userDb.isEmpty()) {
             User user = User.builder()
                     .username("admin")
                     .email("admin@admin.com")

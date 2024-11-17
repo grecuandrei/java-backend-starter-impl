@@ -11,6 +11,7 @@ public class UserMapper {
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .email(user.getEmail())
                 .roles(user.getRoles().stream().map(Role::getId).collect(Collectors.toSet()))
                 .build();
     }
@@ -19,6 +20,7 @@ public class UserMapper {
         return User.builder()
                 .id(userDTO.getId())
                 .username(userDTO.getUsername())
+                .email(userDTO.getEmail())
                 .password(userDTO.getPassword())
                 .build();
     }

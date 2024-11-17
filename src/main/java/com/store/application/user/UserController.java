@@ -40,7 +40,7 @@ public class UserController {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}
             )
     })
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers();
@@ -54,7 +54,7 @@ public class UserController {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}
             )
     })
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @PostMapping("/get-filtered")
     public ResponseEntity<CustomResponse<UserDTO>> getAllUsersFilteredAndPaginated(
             @Parameter(description = "Filter & Pageable query", required = true) @Valid @RequestBody PageFilter pageFilter) {
@@ -67,7 +67,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Successfully fetched user"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@Parameter(description = "User id to get data for", required = true) @PathVariable UUID id) {
         Optional<UserDTO> user = userService.getUserById(id);
@@ -81,7 +81,7 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "User already exists"),
             @ApiResponse(responseCode = "400", description = "Error creating user")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@Parameter(description = "User data to create", required = true) @Valid @RequestBody UserDTO user) {
         try {
@@ -100,7 +100,7 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "User already exists"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @PutMapping
     public ResponseEntity<UserDTO> updateUser(@Parameter(description = "User with updated data", required = true) @Valid @RequestBody UserDTO updatedUser) {
         try {
@@ -120,7 +120,7 @@ public class UserController {
             @ApiResponse(responseCode = "204", description = "Successfully deleted user"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@Parameter(description = "User id to delete data for", required = true) @PathVariable UUID id) {
         try {

@@ -31,7 +31,7 @@ public class PermissionController {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = PermissionDTO.class))}
             )
     })
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @GetMapping
     public ResponseEntity<List<PermissionDTO>> getAllPermissions() {
         List<PermissionDTO> permissions = permissionService.getAllPermissions();
@@ -43,7 +43,7 @@ public class PermissionController {
             @ApiResponse(responseCode = "200", description = "Fetched permission successfully"),
             @ApiResponse(responseCode = "404", description = "Permission not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('READ')")
     @GetMapping("/{id}")
     public ResponseEntity<PermissionDTO> getPermissionById(@Parameter(description = "Permission id to get data for", required = true) @PathVariable UUID id) {
         PermissionDTO permission = permissionService.getPermissionById(id);
@@ -54,7 +54,7 @@ public class PermissionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created new permission successfully")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @PostMapping
     public ResponseEntity<PermissionDTO> createPermission(@Parameter(description = "Permission data to create", required = true) @Valid @RequestBody PermissionDTO permissionDTO) {
         PermissionDTO createdPermission = permissionService.createPermission(permissionDTO);
@@ -66,7 +66,7 @@ public class PermissionController {
             @ApiResponse(responseCode = "200", description = "Updated permission successfully"),
             @ApiResponse(responseCode = "404", description = "Permission not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @PutMapping
     public ResponseEntity<PermissionDTO> updatePermission(@Parameter(description = "Permission with updated data", required = true) @Valid @RequestBody PermissionDTO updatedPermissionDTO) {
         PermissionDTO permission = permissionService.updatePermission(updatedPermissionDTO);
@@ -78,7 +78,7 @@ public class PermissionController {
             @ApiResponse(responseCode = "204", description = "Deleted permission successfully"),
             @ApiResponse(responseCode = "404", description = "Permission not found")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@securityService.hasPermission('WRITE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePermission(@Parameter(description = "Permission id to delete", required = true) @PathVariable UUID id) {
         permissionService.deletePermission(id);

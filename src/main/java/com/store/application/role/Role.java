@@ -50,7 +50,7 @@ public class Role {
     @JsonIdentityReference(alwaysAsId = true)
     private Collection<User> users;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "roles_permissions",
             joinColumns = @JoinColumn(
